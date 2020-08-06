@@ -6,6 +6,9 @@ import {createEventEditTemplate} from './view/event-edit.js';
 import {createTripDayTemplate} from './view/trip-day.js';
 import {createDayItemTemplate} from './view/day-item.js';
 import {createEventItemTemplate} from './view/event-item.js';
+import {generateItemEvent} from "./mock/item-event.js";
+
+console.log(generateItemEvent());
 
 const EVENTS_COUNT = 3;
 
@@ -33,6 +36,7 @@ const daysListElement = eventsElement.querySelector(`.trip-days`);
 render(daysListElement, createDayItemTemplate(), `beforeend`);
 
 const eventListElement = daysListElement.querySelector(`.trip-events__list`);
+
 
 for (let i = 0; i < EVENTS_COUNT; i++) {
   render(eventListElement, createEventItemTemplate(), `beforeend`);
