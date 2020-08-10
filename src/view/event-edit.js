@@ -22,7 +22,7 @@ export const createEventEditTemplate = (itemEvent = newItemEventDefault) => {
       return `No offers available`;
     }
     let rezult = ``;
-    // проверка на наличие выбранных опций, если обции выбраны то вешаем атрибут на чекбокс
+    // проверка на наличие выбранных опций, если опции выбраны то вешаем атрибут на чекбокс
     for (const off of offers) {
       let check = ``;
       if (offer === null) {

@@ -36,7 +36,6 @@ render(controlElement, createFilterTemplate(), `beforeend`);
 const eventsElement = document.querySelector(`.trip-events`);
 
 render(eventsElement, createSortEventTemplate(), `beforeend`);
-// render(eventsElement, createEventEditTemplate(itemsEvent[0]), `beforeend`);
 
 render(eventsElement, createTripDayTemplate(), `beforeend`);
 

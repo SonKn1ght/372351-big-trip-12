@@ -97,7 +97,7 @@ const generateOffer = (pointType, Offers) => {
   if (!Offers[pointType]) {
     return null;
   }
-  // перемещиваем массив опций в рандомном порядке
+  // перемешиваем массив опций в рандомном порядке
   const availableOffers = shuffleArray(Offers[pointType]);
   // определяем сколько попадет опций из массива в выдачу
   const quantityOffers = getRandomInteger(1, Offers[pointType].length);
