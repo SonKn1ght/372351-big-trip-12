@@ -1,32 +1,46 @@
-export const createEventItemTemplate = () => {
+import {humanizeDate, convertMS} from "../utils.js";
+
+export const createEventItemTemplate = (itemEvent) => {
+  const {pointType, iconPoint, destination, timeStart, timeEnd, differenceTime, offer, cost} = itemEvent;
+  const createOffersTemplate = (offers) => {
+    if (!offers) {
+      return ``;
+    }
+    let rezult = ``;
+    for (const off of offers) {
+      rezult += `<li class="event__offer">
+        <span class="event__offer-title">${off[0]}</span>
+        &plus;
+        &euro;&nbsp;<span class="event__offer-price">${off[1]}</span>
+      </li>`;
+    }
+    return rezult;
+  };
+
   return (
     `<li class="trip-events__item">
       <div class="event">
         <div class="event__type">
-          <img class="event__type-icon" width="42" height="42" src="img/icons/taxi.png" alt="Event type icon">
+          <img class="event__type-icon" width="42" height="42" src="img/icons/${iconPoint}" alt="Event type icon">
         </div>
-        <h3 class="event__title">Taxi to Amsterdam</h3>
+        <h3 class="event__title">${pointType} ${destination}</h3>
 
         <div class="event__schedule">
           <p class="event__time">
-            <time class="event__start-time" datetime="2019-03-18T10:30">10:30</time>
+            <time class="event__start-time" datetime="2019-03-18T10:30">${humanizeDate(timeStart)}</time>
             &mdash;
-            <time class="event__end-time" datetime="2019-03-18T11:00">11:00</time>
+            <time class="event__end-time" datetime="2019-03-18T11:00">${humanizeDate(timeEnd)}</time>
           </p>
-          <p class="event__duration">30M</p>
+          <p class="event__duration">${convertMS(differenceTime)}</p>
         </div>
 
         <p class="event__price">
-          &euro;&nbsp;<span class="event__price-value">20</span>
+          &euro;&nbsp;<span class="event__price-value">${cost}</span>
         </p>
 
         <h4 class="visually-hidden">Offers:</h4>
         <ul class="event__selected-offers">
-          <li class="event__offer">
-            <span class="event__offer-title">Order Uber</span>
-            &plus;
-            &euro;&nbsp;<span class="event__offer-price">20</span>
-           </li>
+        ${createOffersTemplate(offer)}
         </ul>
 
         <button class="event__rollup-btn" type="button">
