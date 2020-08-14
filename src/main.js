@@ -41,8 +41,10 @@ render(eventsElement, createTripDayTemplate(), `beforeend`);
 
 const daysListElement = eventsElement.querySelector(`.trip-days`);
 
-
 // рисуем преобразованнные данные
+// numberDay счетчик дней в списке, передаем в функцию для отрисовки номера дня в путешествии
+// countDayInNodeList номер элемента в псевдомассиве - день в котором идет отрисовка пунктов
+// можно было обойтись одной переменной, вторую выразив через нее, изменяются они одинакого, но оставил для явности где какое значение
 let numberDay = 1;
 let countDayInNodeList = 0;
 for (let day of itemsEventByRender) {

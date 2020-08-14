@@ -1,7 +1,7 @@
 import {newItemEventDefault} from "../mock/item-event.js";
 
 export const createEventEditTemplate = (itemEvent = newItemEventDefault) => {
-  const {pointType, iconPoint, destination, timeStart, timeEnd, description, availableOffers, offer, fotos, cost} = itemEvent;
+  const {pointType, iconPoint, destination, timeStart, timeEnd, description, availableOffers, offer, photos, cost} = itemEvent;
 
   const formateDate = (date) => {
     // В британском английском используется порядок день-месяц-год
@@ -9,37 +9,37 @@ export const createEventEditTemplate = (itemEvent = newItemEventDefault) => {
     return str.replace(`,`, ``);
   };
 
-  const renderFotos = (allFotos) => {
-    let rezult = ``;
-    for (const foto of allFotos) {
-      rezult += `<img class="event__photo" src="${foto}" alt="Event photo">`;
+  const renderPhotos = (allPhotos) => {
+    let result = ``;
+    for (const photo of allPhotos) {
+      result += `<img class="event__photo" src="${photo}" alt="Event photo">`;
     }
-    return rezult;
+    return result;
   };
 
   const renderOffers = (offers) => {
     if (!offers) {
       return `No offers available`;
     }
-    let rezult = ``;
+    let result = ``;
     // проверка на наличие выбранных опций, если опции выбраны то вешаем атрибут на чекбокс
-    for (const off of offers) {
+    for (const offerItem of offers) {
       let check = ``;
       if (offer === null) {
         check = ``;
-      } else if (offer.includes(off)) {
+      } else if (offer.includes(offerItem)) {
         check = `checked`;
       }
-      rezult += `<div class="event__offer-selector">
-        <input class="event__offer-checkbox  visually-hidden" id="event-offer-${off[0]}" type="checkbox" name="event-offer-luggage" ${check}>
-          <label class="event__offer-label" for="event-offer-${off[0]}">
-            <span class="event__offer-title">${off[0]}</span>
+      result += `<div class="event__offer-selector">
+        <input class="event__offer-checkbox  visually-hidden" id="event-offer-${offerItem[0]}" type="checkbox" name="event-offer-luggage" ${check}>
+          <label class="event__offer-label" for="event-offer-${offerItem[0]}">
+            <span class="event__offer-title">${offerItem[0]}</span>
             &plus;
-            &euro;&nbsp;<span class="event__offer-price">${off[1]}</span>
+            &euro;&nbsp;<span class="event__offer-price">${offerItem[1]}</span>
           </label>
       </div>`;
     }
-    return rezult;
+    return result;
   };
 
   return (
@@ -165,7 +165,7 @@ export const createEventEditTemplate = (itemEvent = newItemEventDefault) => {
 
           <div class="event__photos-container">
             <div class="event__photos-tape">
-              ${renderFotos(fotos)}
+              ${renderPhotos(photos)}
             </div>
           </div>
         </section>
