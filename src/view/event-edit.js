@@ -1,36 +1,43 @@
 import {newItemEventDefault} from "../mock/item-event.js";
+import {createElement} from "../utils";
 
-export const createEventEditTemplate = (itemEvent = newItemEventDefault) => {
-  const {pointType, iconPoint, destination, timeStart, timeEnd, description, availableOffers, offer, photos, cost} = itemEvent;
+export default class EventEdit {
+  constructor(itemEvent = newItemEventDefault) {
+    this._itemEvent = itemEvent;
+    this._element = null;
+  }
 
-  const formateDate = (date) => {
-    // В британском английском используется порядок день-месяц-год
-    let str = date.toLocaleString(`en-GB`, {day: `2-digit`, month: `2-digit`, year: `2-digit`, hour12: false, hour: `2-digit`, minute: `2-digit`});
-    return str.replace(`,`, ``);
-  };
+  _getTemplate() {
+    const {pointType, iconPoint, destination, timeStart, timeEnd, description, availableOffers, offer, photos, cost} = this._itemEvent;
 
-  const renderPhotos = (allPhotos) => {
-    let result = ``;
-    for (const photo of allPhotos) {
-      result += `<img class="event__photo" src="${photo}" alt="Event photo">`;
-    }
-    return result;
-  };
+    const formateDate = (date) => {
+      // В британском английском используется порядок день-месяц-год
+      let str = date.toLocaleString(`en-GB`, {day: `2-digit`, month: `2-digit`, year: `2-digit`, hour12: false, hour: `2-digit`, minute: `2-digit`});
+      return str.replace(`,`, ``);
+    };
 
-  const renderOffers = (offers) => {
-    if (!offers) {
-      return `No offers available`;
-    }
-    let result = ``;
-    // проверка на наличие выбранных опций, если опции выбраны то вешаем атрибут на чекбокс
-    for (const offerItem of offers) {
-      let check = ``;
-      if (offer === null) {
-        check = ``;
-      } else if (offer.includes(offerItem)) {
-        check = `checked`;
+    const renderPhotos = (allPhotos) => {
+      let result = ``;
+      for (const photo of allPhotos) {
+        result += `<img class="event__photo" src="${photo}" alt="Event photo">`;
       }
-      result += `<div class="event__offer-selector">
+      return result;
+    };
+
+    const renderOffers = (offers) => {
+      if (!offers) {
+        return `No offers available`;
+      }
+      let result = ``;
+      // проверка на наличие выбранных опций, если опции выбраны то вешаем атрибут на чекбокс
+      for (const offerItem of offers) {
+        let check = ``;
+        if (offer === null) {
+          check = ``;
+        } else if (offer.includes(offerItem)) {
+          check = `checked`;
+        }
+        result += `<div class="event__offer-selector">
         <input class="event__offer-checkbox  visually-hidden" id="event-offer-${offerItem[0]}" type="checkbox" name="event-offer-luggage" ${check}>
           <label class="event__offer-label" for="event-offer-${offerItem[0]}">
             <span class="event__offer-title">${offerItem[0]}</span>
@@ -38,12 +45,12 @@ export const createEventEditTemplate = (itemEvent = newItemEventDefault) => {
             &euro;&nbsp;<span class="event__offer-price">${offerItem[1]}</span>
           </label>
       </div>`;
-    }
-    return result;
-  };
+      }
+      return result;
+    };
 
-  return (
-    `<form class="trip-events__item  event  event--edit" action="#" method="post">
+    return (
+      `<form class="trip-events__item  event  event--edit" action="#" method="post">
       <header class="event__header">
         <div class="event__type-wrapper">
           <label class="event__type  event__type-btn" for="event-type-toggle-1">
@@ -154,7 +161,6 @@ export const createEventEditTemplate = (itemEvent = newItemEventDefault) => {
           <h3 class="event__section-title  event__section-title--offers">Offers</h3>
 
           <div class="event__available-offers">
-<!--          сюда-->
       ${renderOffers(availableOffers)}
           </div>
         </section>
@@ -171,5 +177,19 @@ export const createEventEditTemplate = (itemEvent = newItemEventDefault) => {
         </section>
       </section>
     </form>`
-  );
-};
+    );
+  }
+
+  getElement() {
+    if (!this._element) {
+      this._element = createElement(this._getTemplate());
+    }
+
+    return this._element;
+  }
+
+  removeElement() {
+    this._element = null;
+  }
+}
+
