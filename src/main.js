@@ -1,61 +1,82 @@
-import {createTripInfoTemplate} from './view/trip-info.js';
-import {createTabsTemplate} from './view/tabs.js';
-import {createFilterTemplate} from './view/filter.js';
-import {createSortEventTemplate} from './view/sort-event.js';
-import {createEventEditTemplate} from './view/event-edit.js';
-import {createTripDayTemplate} from './view/trip-day.js';
-import {createDayItemTemplate} from './view/day-item.js';
-import {createEventItemTemplate} from './view/event-item.js';
+import TripInfo from "./view/trip-info.js";
+import Tabs from "./view/tabs.js";
+import Filters from "./view/filter.js";
+import SortEvent from "./view/sort-event.js";
+import TripDays from "./view/trip-day.js";
+import DayItem from "./view/day-item.js";
+import EventItem from "./view/event-item";
+import EventEdit from "./view/event-edit.js";
 import {generateItemEvent} from "./mock/item-event.js";
-import {groupBy} from "./utils.js";
-
+import {render, RenderPosition, groupBy} from "./utils.js";
 
 const EVENTS_COUNT = 10;
 
 const itemsEvent = new Array(EVENTS_COUNT).fill().map(generateItemEvent).sort((a, b) => {
   return a.timeStart - b.timeStart;
 });
-// берем сортированный массив элементов точек, без первого элемента(его орисовка будет в форме редактирования),
-// и группируем их в объект с ключами представленными днями месяца, после чего
-// подготавливаем этот объект и передаем его в Мар
-const itemsEventByRender = new Map(Object.entries(groupBy(itemsEvent.slice(1), `dataSort`)));
 
-
-const render = (container, template, place) => {
-  container.insertAdjacentHTML(place, template);
-};
+// берем сортированный массив элементов точек и группируем их в объект с ключами представленными
+// днями месяца, после чего подготавливаем этот объект и передаем его в Мар
+const itemsEventByRender = new Map(Object.entries(groupBy(itemsEvent, `dataSort`)));
 
 const mainElement = document.querySelector(`.trip-main`);
 const controlElement = mainElement.querySelector(`.trip-controls`);
 
+render(mainElement, new TripInfo(itemsEvent).getElement(), RenderPosition.AFTERBEGIN);
 
-render(mainElement, createTripInfoTemplate(itemsEvent), `afterbegin`);
-render(controlElement, createTabsTemplate(), `beforeend`);
-render(controlElement, createFilterTemplate(), `beforeend`);
+// создаю экземпляр, после вызываю отрисовку передавая вызов нужного метода, сначала отрисовываю заголовок => после сам элемент
+const tabs = new Tabs();
+render(controlElement, tabs.getElementBeforeTitle(), RenderPosition.BEFOREEND);
+render(controlElement, tabs.getElement(), RenderPosition.BEFOREEND);
+
+const filters = new Filters();
+render(controlElement, filters.getElementBeforeTitle(), RenderPosition.BEFOREEND);
+render(controlElement, filters.getElement(), RenderPosition.BEFOREEND);
 
 const eventsElement = document.querySelector(`.trip-events`);
 
-render(eventsElement, createSortEventTemplate(), `beforeend`);
+render(eventsElement, new SortEvent().getElement(), RenderPosition.BEFOREEND);
 
-render(eventsElement, createTripDayTemplate(), `beforeend`);
+render(eventsElement, new TripDays().getElement(), RenderPosition.BEFOREEND);
 
 const daysListElement = eventsElement.querySelector(`.trip-days`);
 
+const renderEventItem = (eventListElement, itemEvent) => {
+  const itemEventComponent = new EventItem(itemEvent);
+  const eventEditComponent = new EventEdit(itemEvent);
 
-// рисуем преобразованнные данные
+  const replaceEventToEdit = () => {
+    eventListElement.replaceChild(eventEditComponent.getElement(), itemEventComponent.getElement());
+  };
+
+  const replaceEditToEvent = () => {
+    eventListElement.replaceChild(itemEventComponent.getElement(), eventEditComponent.getElement());
+  };
+
+  itemEventComponent.getElement().querySelector(`.event__rollup-btn`).addEventListener(`click`, () => {
+    replaceEventToEdit();
+  });
+
+  eventEditComponent.getElement().querySelector(`form`).addEventListener(`submit`, (evt) => {
+    evt.preventDefault();
+    replaceEditToEvent();
+  });
+
+  render(eventListElement, itemEventComponent.getElement(), RenderPosition.BEFOREEND);
+};
+
+// счетчик номера дня, передаю в экземпляр дня, параметром для отрисовки номера дня в списке
 let numberDay = 1;
-let countDayInNodeList = 0;
-for (let day of itemsEventByRender) {
-  render(daysListElement, createDayItemTemplate(numberDay, day[0]), `beforeend`);
 
-  const eventListElement = daysListElement.querySelectorAll(`.trip-events__list`);
-  if (eventListElement.length === 1) {
-    render(eventListElement[countDayInNodeList], createEventEditTemplate(itemsEvent[0]), `beforeend`);
-  }
+for (let day of itemsEventByRender) {
+  const eventListElement = new DayItem(numberDay, day[0]).getElement();
+  render(daysListElement, eventListElement, RenderPosition.BEFOREEND);
+
   for (let point of day[1]) {
-    render(eventListElement[countDayInNodeList], createEventItemTemplate(point), `beforeend`);
+    const tripEventsList = eventListElement.querySelector(`.trip-events__list`);
+    renderEventItem(tripEventsList, point);
   }
   numberDay++;
-  countDayInNodeList++;
 }
+
 

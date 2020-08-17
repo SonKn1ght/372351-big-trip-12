@@ -6,10 +6,10 @@ export const getRandomInteger = (a = 0, b = 1) => {
 };
 
 export const shuffleArray = (array) => {
-  let mixedArray = array.slice();
+  const mixedArray = array.slice();
   for (let i = mixedArray.length - 1; i > 0; i--) {
-    let randomIndex = Math.floor(Math.random() * (i + 1));
-    let tempValue = mixedArray[i];
+    const randomIndex = Math.floor(Math.random() * (i + 1));
+    const tempValue = mixedArray[i];
     mixedArray[i] = mixedArray[randomIndex];
     mixedArray[randomIndex] = tempValue;
   }
@@ -51,8 +51,8 @@ export const convertMS = (millisec) => {
   return `${minutes}M`;
 };
 
-export const groupBy = function (arr, criteria) {
-  return arr.reduce(function (obj, item) {
+export const groupBy = function (array, criteria) {
+  return array.reduce(function (obj, item) {
     const key = item[criteria];
     // Если свойство не создано, создаем его.
     if (!obj.hasOwnProperty(key)) {
@@ -63,4 +63,31 @@ export const groupBy = function (arr, criteria) {
     // Возвращение объекта для следующего шага
     return obj;
   }, {});
+};
+
+export const RenderPosition = {
+  AFTERBEGIN: `afterbegin`,
+  BEFOREEND: `beforeend`
+};
+
+export const render = (container, element, place) => {
+  switch (place) {
+    case RenderPosition.AFTERBEGIN:
+      container.prepend(element);
+      break;
+    case RenderPosition.BEFOREEND:
+      container.append(element);
+      break;
+  }
+};
+
+export const createElement = (template) => {
+  const newElement = document.createElement(`div`);
+  newElement.innerHTML = template;
+
+  return newElement.firstChild;
+};
+
+export const renderTemplate = (container, template, place) => {
+  container.insertAdjacentHTML(place, template);
 };
