@@ -1,15 +1,16 @@
-import TripInfo from "./view/trip-info.js";
-import Tabs from "./view/tabs.js";
-import Filters from "./view/filter.js";
-import SortEvent from "./view/sort-event.js";
-import TripDays from "./view/trip-day.js";
-import DayItem from "./view/day-item.js";
-import EventItem from "./view/event-item";
-import EventEdit from "./view/event-edit.js";
-import {generateItemEvent} from "./mock/item-event.js";
-import {render, RenderPosition, groupBy} from "./utils.js";
+import TripInfo from './view/trip-info.js';
+import Tabs from './view/tabs.js';
+import Filters from './view/filter.js';
+import SortEvent from './view/sort-event.js';
+import TripDays from './view/trip-day.js';
+import DayItem from './view/day-item.js';
+import EventItem from './view/event-item';
+import EventEdit from './view/event-edit.js';
+import NoEvent from './view/no-event.js';
+import {generateItemEvent} from './mock/item-event.js';
+import {render, RenderPosition, groupBy} from './utils.js';
 
-const EVENTS_COUNT = 10;
+const EVENTS_COUNT = 0;
 
 const itemsEvent = new Array(EVENTS_COUNT).fill().map(generateItemEvent).sort((a, b) => {
   return a.timeStart - b.timeStart;
@@ -29,15 +30,22 @@ const tabs = new Tabs();
 render(controlElement, tabs.getElementBeforeTitle(), RenderPosition.BEFOREEND);
 render(controlElement, tabs.getElement(), RenderPosition.BEFOREEND);
 
+
 const filters = new Filters();
 render(controlElement, filters.getElementBeforeTitle(), RenderPosition.BEFOREEND);
 render(controlElement, filters.getElement(), RenderPosition.BEFOREEND);
 
+
 const eventsElement = document.querySelector(`.trip-events`);
 
-render(eventsElement, new SortEvent().getElement(), RenderPosition.BEFOREEND);
+// условия на приглашение добавления первой точки маршрута, если таковые отсутствуют
+if (itemsEvent.length !== 0) {
+  render(eventsElement, new SortEvent().getElement(), RenderPosition.BEFOREEND);
+  render(eventsElement, new TripDays().getElement(), RenderPosition.BEFOREEND);
+} else {
+  render(eventsElement, new NoEvent().getElement(), RenderPosition.BEFOREEND);
+}
 
-render(eventsElement, new TripDays().getElement(), RenderPosition.BEFOREEND);
 
 const daysListElement = eventsElement.querySelector(`.trip-days`);
 
@@ -53,13 +61,23 @@ const renderEventItem = (eventListElement, itemEvent) => {
     eventListElement.replaceChild(itemEventComponent.getElement(), eventEditComponent.getElement());
   };
 
+  const onEscKeyDown = (evt) => {
+    if (evt.key === `Escape` || evt.key === `Esc`) {
+      evt.preventDefault();
+      replaceEditToEvent();
+      document.removeEventListener(`keydown`, onEscKeyDown);
+    }
+  };
+
   itemEventComponent.getElement().querySelector(`.event__rollup-btn`).addEventListener(`click`, () => {
     replaceEventToEdit();
+    document.addEventListener(`keydown`, onEscKeyDown);
   });
 
   eventEditComponent.getElement().querySelector(`form`).addEventListener(`submit`, (evt) => {
     evt.preventDefault();
     replaceEditToEvent();
+    document.removeEventListener(`keydown`, onEscKeyDown);
   });
 
   render(eventListElement, itemEventComponent.getElement(), RenderPosition.BEFOREEND);

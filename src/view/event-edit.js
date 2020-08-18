@@ -1,5 +1,5 @@
-import {newItemEventDefault} from "../mock/item-event.js";
-import {createElement} from "../utils";
+import {newItemEventDefault} from '../mock/item-event.js';
+import {createElement} from '../utils';
 
 export default class EventEdit {
   constructor(itemEvent = newItemEventDefault) {
