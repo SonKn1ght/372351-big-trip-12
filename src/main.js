@@ -10,7 +10,7 @@ import NoEvent from './view/no-event.js';
 import {generateItemEvent} from './mock/item-event.js';
 import {render, RenderPosition, groupBy} from './utils.js';
 
-const EVENTS_COUNT = 0;
+const EVENTS_COUNT = 10;
 
 const itemsEvent = new Array(EVENTS_COUNT).fill().map(generateItemEvent).sort((a, b) => {
   return a.timeStart - b.timeStart;
@@ -84,17 +84,15 @@ const renderEventItem = (eventListElement, itemEvent) => {
 };
 
 // счетчик номера дня, передаю в экземпляр дня, параметром для отрисовки номера дня в списке
+// не могу избавится от этой внешней переменной
 let numberDay = 1;
-
-for (let day of itemsEventByRender) {
-  const eventListElement = new DayItem(numberDay, day[0]).getElement();
+// переделал эту часть кода. так лучше? или сделал тоже самое только другими словами?
+itemsEventByRender.forEach((points, key) => {
+  const eventListElement = new DayItem(numberDay, key).getElement();
   render(daysListElement, eventListElement, RenderPosition.BEFOREEND);
-
-  for (let point of day[1]) {
-    const tripEventsList = eventListElement.querySelector(`.trip-events__list`);
-    renderEventItem(tripEventsList, point);
-  }
   numberDay++;
-}
-
-
+  const tripEventsList = eventListElement.querySelector(`.trip-events__list`);
+  points.forEach((point) => {
+    renderEventItem(tripEventsList, point);
+  });
+});
