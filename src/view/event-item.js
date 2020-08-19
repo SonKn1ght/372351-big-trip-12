@@ -1,4 +1,4 @@
-import {humanizeDate, convertMS, createElement} from "../utils.js";
+import {humanizeDate, convertMS, createElement} from '../utils.js';
 
 export default class EventItem {
   constructor(itemEvent) {

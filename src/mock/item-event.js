@@ -1,4 +1,4 @@
-import {getRandomInteger, shuffleArray, dayDate} from "../utils.js";
+import {getRandomInteger, shuffleArray, dayDate} from '../utils.js';
 // Вынес ICONS в константы, функции generatAvailableOffers и generatePoinTypeIcon вообще убрал, т.к. там внутри только обращение по ключу к объекту. Теперь это делаю прямо при генерации объекта.
 const POINTS_TYPE = [
   `Taxi to`,
@@ -170,7 +170,7 @@ export const generateItemEvent = () => {
 export const newItemEventDefault = {
   pointType: `Taxi to`,
   iconPoint: `taxi.png`,
-  destination: `destination`,
+  destination: ``,
   timeStart: new Date(),
   timeEnd: new Date(),
   description: ``,
@@ -179,4 +179,5 @@ export const newItemEventDefault = {
   photos: [],
   cost: ``
 };
+
 
