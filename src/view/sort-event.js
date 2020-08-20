@@ -1,10 +1,6 @@
-import {createElement} from '../utils';
+import AbstractView from './abstract.js';
 
-export default class SortEvent {
-  constructor() {
-    this._element = null;
-  }
-
+export default class SortEvent extends AbstractView {
   _getTemplate() {
     return `<form class="trip-events__trip-sort  trip-sort" action="#" method="get">
       <span class="trip-sort__item  trip-sort__item--day">Day</span>
@@ -37,17 +33,4 @@ export default class SortEvent {
       <span class="trip-sort__item  trip-sort__item--offers">Offers</span>
     </form>`;
   }
-
-  getElement() {
-    if (!this._element) {
-      this._element = createElement(this._getTemplate());
-    }
-
-    return this._element;
-  }
-
-  removeElement() {
-    this._element = null;
-  }
 }
-

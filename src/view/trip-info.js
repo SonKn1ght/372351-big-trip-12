@@ -1,10 +1,10 @@
-import {createElement} from '../utils';
+import AbstractView from './abstract.js';
 
 
-export default class TripInfo {
+export default class TripInfo extends AbstractView {
   constructor(itemsEvent) {
+    super();
     this._itemsEvent = itemsEvent;
-    this._element = null;
   }
 
   _getTemplate() {
@@ -15,7 +15,7 @@ export default class TripInfo {
     }
     route = route.join(` — `);
     // получаем даты преобразуем к требуемому на выход формату и проверка на случай изменения месяца тогда добавляем месяц к второму пункту интервала
-    // тут падало приложение добавил проверку на наличие событий => если нет то отдаем пустую строку
+    // сначала проверка на наличие событий => если нет то отдаем пустую строку
     let dateTripResult = ``;
     if (this._itemsEvent.length !== 0) {
       const dateStart = this._itemsEvent[0].timeStart;
@@ -55,18 +55,6 @@ export default class TripInfo {
       </p>
     </section>`
     );
-  }
-
-  getElement() {
-    if (!this._element) {
-      this._element = createElement(this._getTemplate());
-    }
-
-    return this._element;
-  }
-
-  removeElement() {
-    this._element = null;
   }
 }
 

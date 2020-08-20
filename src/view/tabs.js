@@ -1,9 +1,9 @@
-import {createElement} from '../utils';
+import AbstractView from './abstract.js';
 
-export default class Tabs {
+export default class Tabs extends AbstractView {
   constructor() {
+    super();
     this._beforeTitle = null;
-    this._element = null;
   }
 
   _getTemplate() {
@@ -17,22 +17,6 @@ export default class Tabs {
     return `<h2 class="visually-hidden">Switch trip view</h2>`;
   }
 
-  getElement() {
-    if (!this._element) {
-      this._element = createElement(this._getTemplate());
-    }
-
-    return this._element;
-  }
-
-  getElementBeforeTitle() {
-    if (!this._beforeTitle) {
-      this._beforeTitle = createElement(this._getTemplateBeforeTitle());
-    }
-
-    return this._beforeTitle;
-  }
-  // удаляется 2 элемента одним методом, т.к. заголовок и блок существуют парой
   removeElement() {
     this._element = null;
     this._beforeTitle = null;
