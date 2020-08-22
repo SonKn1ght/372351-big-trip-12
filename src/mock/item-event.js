@@ -1,4 +1,4 @@
-import {getRandomInteger, shuffleArray, dayDate} from '../utils.js';
+import {getRandomInteger, shuffleArray, dayDate} from '../utils/common.js';
 // Вынес ICONS в константы, функции generatAvailableOffers и generatePoinTypeIcon вообще убрал, т.к. там внутри только обращение по ключу к объекту. Теперь это делаю прямо при генерации объекта.
 const POINTS_TYPE = [
   `Taxi to`,
@@ -46,7 +46,7 @@ const CATALOG_OFFERS = {
   [`Drive to`]: [[`Offer Drive 1 `, 150], [`Offer Drive 2 `, 160], [`Offer Drive 3 `, 170]],
   [`Flight to`]: [[`Add luggage `, 50], [`Add meal `, 15], [`Switch to comfort `, 100], [`Choose seats `, 5], [`Travel by train `, 40]],
   [`Check in`]: [[`Offer Check 1  `, 100], [`Offer Check 2  `, 110]],
-  [`Sightseeing in`]: [[`Offer Sightseeing 1 `, 50], [`Offer Sightseeing 2 + € `, 60], [`Offer Sightseeing 3 `, 70]],
+  [`Sightseeing in`]: [[`Offer Sightseeing 1 `, 50], [`Offer Sightseeing 2 `, 60], [`Offer Sightseeing 3 `, 70]],
   [`Restaurant in`]: null
 };
 const CITIES = [
@@ -118,6 +118,7 @@ const generateOffer = (pointType, Offers) => {
   const availableOffers = shuffleArray(Offers[pointType]);
   // определяем сколько попадет опций из массива в выдачу
   const quantityOffers = getRandomInteger(1, Offers[pointType].length);
+
   // возвращаем перемешанный и обрезанный(или необрезанный, как рандом пошлет) массив с опциями
   return availableOffers.slice(0, quantityOffers);
 };

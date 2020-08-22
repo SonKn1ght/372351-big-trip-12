@@ -1,10 +1,11 @@
 import {newItemEventDefault} from '../mock/item-event.js';
-import {createElement} from '../utils';
+import AbstractView from './abstract.js';
 
-export default class EventEdit {
+export default class EventEdit extends AbstractView {
   constructor(itemEvent = newItemEventDefault) {
+    super();
     this._itemEvent = itemEvent;
-    this._element = null;
+    this._formSubmitHandler = this._formSubmitHandler.bind(this);
   }
 
   _getTemplate() {
@@ -182,16 +183,14 @@ export default class EventEdit {
     );
   }
 
-  getElement() {
-    if (!this._element) {
-      this._element = createElement(this._getTemplate());
-    }
-
-    return this._element;
+  _formSubmitHandler(evt) {
+    evt.preventDefault();
+    this._callback.formSubmit();
   }
 
-  removeElement() {
-    this._element = null;
+  setFormSubmitHandler(callback) {
+    this._callback.formSubmit = callback;
+    this.getElement().querySelector(`form`).addEventListener(`submit`, this._formSubmitHandler);
   }
 }
 
