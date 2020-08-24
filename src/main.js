@@ -30,3 +30,4 @@ const eventsElement = document.querySelector(`.trip-events`);
 const tripPresenter = new TripPresenter(eventsElement);
 tripPresenter.init(itemsEvent);
 
+
