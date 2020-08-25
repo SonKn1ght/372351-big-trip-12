@@ -7,7 +7,7 @@ import TripDays from '../view/trip-day.js';
 import {render, RenderPosition, replace} from '../utils/render.js';
 import {groupBy} from '../utils/event.js';
 import {SortType} from '../const.js';
-import {sortEvetDuration, sortEventPrice} from '../utils/event.js';
+import {sortEventDuration, sortEventPrice} from '../utils/event.js';
 
 export default class Trip {
   constructor(tripContainer) {
@@ -26,8 +26,8 @@ export default class Trip {
       this._renderNoEvent();
       return;
     }
+    this._sourcedItemsEvent = itemsEvent;
     this._itemsEvent = itemsEvent.slice();
-    this._sourcedItemsEvent = itemsEvent.slice();
     this._renderSortEvent();
     this._renderTripDays();
     this._renderEventList();
@@ -36,13 +36,14 @@ export default class Trip {
   _sortTasks(sortType) {
     switch (sortType) {
       case SortType.DURATION:
-        this._itemsEvent.sort(sortEvetDuration);
+        this._itemsEvent.sort(sortEventDuration);
+        this._renderEventListSorted();
         break;
       case SortType.PRICE:
         this._itemsEvent.sort(sortEventPrice);
+        this._renderEventListSorted();
         break;
-      default:
-        this._itemsEvent = this._sourcedItemsEvent.slice();
+      default: this._renderEventList();
     }
     this._currentSortType = sortType;
   }
@@ -51,14 +52,9 @@ export default class Trip {
     if (this._currentSortType === sortType) {
       return;
     }
-
-    this._sortTasks(sortType);
+    // убрал отсюда дубль проверки и перенес отрисовку в _sortTasks
     this._clearTripDays();
-    if (sortType === `default`) {
-      this._renderEventList();
-      return;
-    }
-    this._renderEventListSorted();
+    this._sortTasks(sortType);
   }
 
   _renderNoEvent() {
@@ -104,6 +100,7 @@ export default class Trip {
     });
 
     eventEditComponent.setFormSubmitHandler((evt) => {
+      replaceEditToEvent();
       evt.preventDefault();
       document.removeEventListener(`keydown`, onEscKeyDown);
     });
@@ -112,7 +109,7 @@ export default class Trip {
   }
 
   _renderEventList() {
-    const itemsEventByRender = Object.entries(groupBy(this._itemsEvent, `dataSort`));
+    const itemsEventByRender = Object.entries(groupBy(this._sourcedItemsEvent, `dataSort`));
     // ура я выкинул наружнюю переменную, убрал мапу => использую просто массив из массивов)), во вложенных -
     // 2 элементами в 1м элементе дата, во втором массив точек относящихся к этой дате
     // собственно все это для доступа внутри forEach к номеру итерации, на Map в коллбэк forEach передают ключ, а на массиве индекс

@@ -16,7 +16,6 @@ const controlElement = mainElement.querySelector(`.trip-controls`);
 
 render(mainElement, new TripInfo(itemsEvent), RenderPosition.AFTERBEGIN);
 
-// с этими двумя h2, как курица с яйцом, пока через в abstract сунул в методы и в потомках реализовал. Вот думаю может лучше было просто ещё 2 класса сделать и их тут вызывать?
 const tabs = new Tabs();
 render(controlElement, tabs.getElementBeforeTitle(), RenderPosition.BEFOREEND);
 render(controlElement, tabs, RenderPosition.BEFOREEND);

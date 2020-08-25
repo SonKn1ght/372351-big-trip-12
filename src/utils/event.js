@@ -12,11 +12,11 @@ export const groupBy = function (array, criteria) {
   }, {});
 };
 
-export const sortEvetDuration = (evetA, evetB) => {
-  return evetB.differenceTime - evetA.differenceTime;
+export const sortEventDuration = (eventA, eventB) => {
+  return eventB.differenceTime - eventA.differenceTime;
 };
 
 // в т.з. явно не описано, сортирую по стоимости точки, без учета стоимости предложений
-export const sortEventPrice = (evetA, evetB) => {
-  return evetB.cost - evetA.cost;
+export const sortEventPrice = (eventA, eventB) => {
+  return eventB.cost - eventA.cost;
 };
