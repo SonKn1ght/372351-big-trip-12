@@ -70,6 +70,10 @@ const MAX_COST = 250;
 
 let timeAccumulator = 0;
 
+const generateId = () => {
+  return Date.now() + parseInt(Math.random() * 10000, 10);
+};
+
 const generatePointType = () => {
   const randomIndex = getRandomInteger(0, POINTS_TYPE.length - 1);
   return POINTS_TYPE[randomIndex];
@@ -152,6 +156,7 @@ export const generateItemEvent = () => {
   const {timeStart, timeEnd, differenceTime} = generateTime(timeAccumulator);
   const availableOffers = CATALOG_OFFERS[pointType];
   return {
+    id: generateId(),
     dataSort: dayDate(timeStart),
     pointType,
     iconPoint,
@@ -163,7 +168,8 @@ export const generateItemEvent = () => {
     availableOffers,
     description: generateDescription(),
     photos: generatePhotos(),
-    cost: generateCost()
+    cost: generateCost(),
+    isFavorite: false
   };
 };
 
@@ -178,7 +184,8 @@ export const newItemEventDefault = {
   availableOffers: CATALOG_OFFERS[`Taxi to`],
   offer: null,
   photos: [],
-  cost: ``
+  cost: ``,
+  isFavorite: false
 };
 
 

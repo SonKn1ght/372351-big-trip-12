@@ -1,22 +1,27 @@
 import DayItem from '../view/day-item.js';
-import EventEdit from '../view/event-edit.js';
-import EventItem from '../view/event-item.js';
 import NoEvent from '../view/no-event.js';
 import SortEvent from '../view/sort-event.js';
 import TripDays from '../view/trip-day.js';
-import {render, RenderPosition, replace} from '../utils/render.js';
+import EventItemPresenter from './event-item.js';
+import {updateItem} from '../utils/common.js';
+import {remove, render, RenderPosition} from '../utils/render.js';
 import {groupBy} from '../utils/event.js';
 import {SortType} from '../const.js';
 import {sortEventDuration, sortEventPrice} from '../utils/event.js';
+
 
 export default class Trip {
   constructor(tripContainer) {
     this._tripContainer = tripContainer;
     this._currentSortType = SortType.DEFAULT;
 
+    this._eventItemPresenter = {};
+    this._eventListElements = {};
+
     this._noEvent = new NoEvent();
     this._sortEvent = new SortEvent();
     this._tripDays = new TripDays();
+    this._handleEventItemChange = this._handleEventItemChange.bind(this);
     this._handleSortTypeChange = this._handleSortTypeChange.bind(this);
   }
 
@@ -33,15 +38,21 @@ export default class Trip {
     this._renderEventList();
   }
 
+  _handleEventItemChange(updatedEventItem) {
+    this._itemsEvent = updateItem(this._itemsEvent, updatedEventItem);
+    this._sourcedItemsEvent = updateItem(this._sourcedItemsEvent, updatedEventItem);
+    this._eventItemPresenter[updatedEventItem.id].init(updatedEventItem);
+  }
+
   _sortTasks(sortType) {
     switch (sortType) {
       case SortType.DURATION:
         this._itemsEvent.sort(sortEventDuration);
-        this._renderEventListSorted();
+        this._renderEventList(true);
         break;
       case SortType.PRICE:
         this._itemsEvent.sort(sortEventPrice);
-        this._renderEventListSorted();
+        this._renderEventList(true);
         break;
       default: this._renderEventList();
     }
@@ -71,67 +82,56 @@ export default class Trip {
   }
 
   _clearTripDays() {
-    this._tripDays.getElement().innerHTML = ``;
+    Object
+      .values(this._eventItemPresenter)
+      .forEach((presenter) => {
+        presenter.destroy();
+      });
+    this._eventItemPresenter = {};
+
+    // отдельно удаляю дни, были мысли им свой презентер сделать, но они для этого слишком просты и не имеют своего интерактива
+    Object
+      .values(this._eventListElements)
+      .forEach((element) => {
+        remove(element);
+      });
+    this._eventListElements = {};
   }
 
   _renderEventItem(eventListElement, itemEvent) {
-    const itemEventComponent = new EventItem(itemEvent);
-    const eventEditComponent = new EventEdit(itemEvent);
-
-    const replaceEventToEdit = () => {
-      replace(eventEditComponent, itemEventComponent);
-    };
-
-    const replaceEditToEvent = () => {
-      replace(itemEventComponent, eventEditComponent);
-    };
-
-    const onEscKeyDown = (evt) => {
-      if (evt.key === `Escape` || evt.key === `Esc`) {
-        evt.preventDefault();
-        replaceEditToEvent();
-        document.removeEventListener(`keydown`, onEscKeyDown);
-      }
-    };
-
-    itemEventComponent.setEditClickHandler(() => {
-      replaceEventToEdit();
-      document.addEventListener(`keydown`, onEscKeyDown);
-    });
-
-    eventEditComponent.setFormSubmitHandler((evt) => {
-      replaceEditToEvent();
-      evt.preventDefault();
-      document.removeEventListener(`keydown`, onEscKeyDown);
-    });
-
-    render(eventListElement, itemEventComponent, RenderPosition.BEFOREEND);
+    const eventItemPresenter = new EventItemPresenter(eventListElement, this._handleEventItemChange);
+    eventItemPresenter.init(itemEvent);
+    // сохраняем ссылки на точки в отдельное свойство
+    this._eventItemPresenter[itemEvent.id] = eventItemPresenter;
   }
 
-  _renderEventList() {
-    const itemsEventByRender = Object.entries(groupBy(this._sourcedItemsEvent, `dataSort`));
-    // ура я выкинул наружнюю переменную, убрал мапу => использую просто массив из массивов)), во вложенных -
-    // 2 элементами в 1м элементе дата, во втором массив точек относящихся к этой дате
-    // собственно все это для доступа внутри forEach к номеру итерации, на Map в коллбэк forEach передают ключ, а на массиве индекс
-    itemsEventByRender.forEach((current, index) => {
-      // к index прибавляем 1, что б нумерация шла с одного.
-      // Можно конечно тут и отдельную переменную под него завести, но она внутри будет инициализироваться на каждой итерации.
-      // А вот теперь вопрос попадает ли префиксный инкремент под Б31, критерий про магию?
-      const eventListElement = new DayItem(++index, current[0]);
-      render(this._tripDays, eventListElement, RenderPosition.BEFOREEND);
-      const tripEventsList = eventListElement.getElement().querySelector(`.trip-events__list`);
+  _renderEventList(sorted = null) {
+    // переделал две функции в одну, т.к. вроде одну задачу решают
+    // объявляею переменные вне условий, дабы были они за за блочной область видимости, удобно было бы использовать
+    // внутри if - var, но критерии.
+    let itemsEventByRender;
+    let index;
+    // в завистимости от типа вызова функции присваиваю нужные значения
+    if (!sorted) {
+      itemsEventByRender = Object.entries(groupBy(this._sourcedItemsEvent, `dataSort`));
+      index = 1;
+    } else {
+      itemsEventByRender = [[``, this._itemsEvent]];
+      index = ``;
+    }
+    // вызываю отрисовку
+    itemsEventByRender.forEach((current) => {
+      this._eventListElement = new DayItem(index, current[0]);
+      index++;
+      // сохраняем ссылки на дни в отдельное свойство,
+      // ключ - собственно дата, не завожу для нее отдельных функций по генерации ключа
+      // так как она у нас уникальна для каждого дня
+      this._eventListElements[current[0]] = this._eventListElement;
+      render(this._tripDays, this._eventListElement, RenderPosition.BEFOREEND);
+      const tripEventsList = this._eventListElement.getElement().querySelector(`.trip-events__list`);
       current[1].forEach((point) => {
         this._renderEventItem(tripEventsList, point);
       });
-    });
-  }
-
-  _renderEventListSorted() {
-    const eventListElement = new DayItem(``, ``);
-    render(this._tripDays, eventListElement, RenderPosition.BEFOREEND);
-    const tripEventsList = eventListElement.getElement().querySelector(`.trip-events__list`);
-    this._itemsEvent.forEach((item) => {
-      this._renderEventItem(tripEventsList, item);
     });
   }
 }
