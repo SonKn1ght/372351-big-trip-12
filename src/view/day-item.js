@@ -2,7 +2,7 @@ import AbstractView from './abstract.js';
 import {dayDate} from "../utils/common";
 
 export default class DayItem extends AbstractView {
-  constructor(numberDay, date) {
+  constructor(numberDay = ``, date = ``) {
     super();
     this._date = date;
     this._numberDay = numberDay;

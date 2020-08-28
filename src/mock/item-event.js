@@ -88,8 +88,8 @@ const generateTime = (param) => {
   if (param === 0) {
     timeStart = new Date((Date.now() + (60 * 60 * 1000)));
   }
-  // создаем конец события начало события + интервал в 6 часов
-  const timeEnd = new Date((timeStart.getTime() + (6 * 60 * 60 * 1000)));
+  // создаем конец события начало события + интервал от 1 го до 6 часов, добавил разброс для теста сортировки
+  const timeEnd = new Date((timeStart.getTime() + (getRandomInteger(1, 40) * 60 * 60 * 1000)));
   // получаем разницу между началом и концом в милисекундах
   const differenceTime = timeEnd - timeStart;
   // обновляем переменную => внешний накопитель даты
