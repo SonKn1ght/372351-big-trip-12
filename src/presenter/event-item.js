@@ -2,14 +2,20 @@ import {render, RenderPosition, replace, remove} from '../utils/render.js';
 import EventEditView from '../view/event-edit.js';
 import EventItemView from '../view/event-item.js';
 
+const Mode = {
+  DEFAULT: `DEFAULT`,
+  EDITING: `EDITING`
+};
+
 export default class EventItem {
-  constructor(tripEventsList, changeData) {
-    // в tripEventsList передается сразу Dom элемент
+  constructor(tripEventsList, changeData, changeMode) {
     this._tripEventsList = tripEventsList;
     this._changeData = changeData;
+    this._changeMode = changeMode;
 
     this._itemEventComponent = null;
     this._eventEditComponent = null;
+    this._mode = Mode.DEFAULT;
 
     this._handleEditClick = this._handleEditClick.bind(this);
     this._handleFormSubmit = this._handleFormSubmit.bind(this);
@@ -36,11 +42,11 @@ export default class EventItem {
       return;
     }
 
-    if (this._tripEventsList.contains(prevEventItemComponent.getElement())) {
+    if (this._mode === Mode.DEFAULT) {
       replace(this._itemEventComponent, prevEventItemComponent);
     }
 
-    if (this._tripEventsList.contains(prevEventEditComponent.getElement())) {
+    if (this._mode === Mode.EDITING) {
       replace(this._eventEditComponent, prevEventEditComponent);
     }
 
@@ -53,19 +59,29 @@ export default class EventItem {
     remove(this._eventEditComponent);
   }
 
+  resetView() {
+    if (this._mode !== Mode.DEFAULT) {
+      this._replaceEditToEvent();
+    }
+  }
+
   _replaceEventToEdit() {
     replace(this._eventEditComponent, this._itemEventComponent);
     document.addEventListener(`keydown`, this._escKeyDownHandler);
+    this._changeMode();
+    this._mode = Mode.EDITING;
   }
 
   _replaceEditToEvent() {
     replace(this._itemEventComponent, this._eventEditComponent);
     document.removeEventListener(`keydown`, this._escKeyDownHandler);
+    this._mode = Mode.DEFAULT;
   }
 
   _escKeyDownHandler(evt) {
     if (evt.key === `Escape` || evt.key === `Esc`) {
       evt.preventDefault();
+      this._eventEditComponent.reset(this._itemEvent);
       this._replaceEditToEvent();
     }
   }

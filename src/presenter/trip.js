@@ -23,6 +23,7 @@ export default class Trip {
     this._tripDays = new TripDays();
     this._handleEventItemChange = this._handleEventItemChange.bind(this);
     this._handleSortTypeChange = this._handleSortTypeChange.bind(this);
+    this._handleModeChange = this._handleModeChange.bind(this);
   }
 
   init(itemsEvent) {
@@ -36,6 +37,12 @@ export default class Trip {
     this._renderSortEvent();
     this._renderTripDays();
     this._renderEventList();
+  }
+
+  _handleModeChange() {
+    Object
+      .values(this._eventItemPresenter)
+      .forEach((presenter) => presenter.resetView());
   }
 
   _handleEventItemChange(updatedEventItem) {
@@ -99,7 +106,7 @@ export default class Trip {
   }
 
   _renderEventItem(eventListElement, itemEvent) {
-    const eventItemPresenter = new EventItemPresenter(eventListElement, this._handleEventItemChange);
+    const eventItemPresenter = new EventItemPresenter(eventListElement, this._handleEventItemChange, this._handleModeChange);
     eventItemPresenter.init(itemEvent);
     // сохраняем ссылки на точки в отдельное свойство
     this._eventItemPresenter[itemEvent.id] = eventItemPresenter;

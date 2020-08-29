@@ -1,28 +1,31 @@
 import {getRandomInteger, shuffleArray, dayDate} from '../utils/common.js';
 // Вынес ICONS в константы, функции generatAvailableOffers и generatePoinTypeIcon вообще убрал, т.к. там внутри только обращение по ключу к объекту. Теперь это делаю прямо при генерации объекта.
-const POINTS_TYPE = [
-  `Taxi to`,
-  `Bus to`,
-  `Train to`,
-  `Ship to`,
-  `Transport to`,
-  `Drive to`,
-  `Flight to`,
-  `Check in`,
-  `Sightseeing in`,
-  `Restaurant in`
+export const TRANSFER_POINTS = [
+  `Taxi`,
+  `Bus`,
+  `Train`,
+  `Ship`,
+  `Transport`,
+  `Drive`,
+  `Flight`
 ];
-const ICONS = {
-  [`Taxi to`]: `taxi.png`,
-  [`Bus to`]: `bus.png`,
-  [`Train to`]: `train.png`,
-  [`Ship to`]: `ship.png`,
-  [`Transport to`]: `transport.png`,
-  [`Drive to`]: `drive.png`,
-  [`Flight to`]: `flight.png`,
-  [`Check in`]: `check-in.png`,
-  [`Sightseeing in`]: `sightseeing.png`,
-  [`Restaurant in`]: `restaurant.png`
+export const ACTIVITY_POINTS = [
+  `Check-in`,
+  `Sightseeing`,
+  `Restaurant`
+];
+const POINTS_TYPE = TRANSFER_POINTS.concat(ACTIVITY_POINTS);
+export const ICONS = {
+  [`Taxi`]: `taxi.png`,
+  [`Bus`]: `bus.png`,
+  [`Train`]: `train.png`,
+  [`Ship`]: `ship.png`,
+  [`Transport`]: `transport.png`,
+  [`Drive`]: `drive.png`,
+  [`Flight`]: `flight.png`,
+  [`Check-in`]: `check-in.png`,
+  [`Sightseeing`]: `sightseeing.png`,
+  [`Restaurant`]: `restaurant.png`
 };
 const DESCRIPTION_OPTIONS = [
   `Lorem ipsum dolor sit amet, consectetur adipiscing elit.`,
@@ -37,17 +40,17 @@ const DESCRIPTION_OPTIONS = [
   `Nunc fermentum tortor ac porta dapibus.`,
   `In rutrum ac purus sit amet tempus.`
 ];
-const CATALOG_OFFERS = {
-  [`Taxi to`]: [[`Offer Taxi 1 `, 20], [`Offer Taxi 2 `, 20]],
-  [`Bus to`]: null,
-  [`Train to`]: [[`Offer Train 1 `, 50], [`Offer Train 2 `, 60]],
-  [`Ship to`]: [[`Offer Ship 1 `, 40], [`Offer Ship 2 `, 50]],
-  [`Transport to`]: null,
-  [`Drive to`]: [[`Offer Drive 1 `, 150], [`Offer Drive 2 `, 160], [`Offer Drive 3 `, 170]],
-  [`Flight to`]: [[`Add luggage `, 50], [`Add meal `, 15], [`Switch to comfort `, 100], [`Choose seats `, 5], [`Travel by train `, 40]],
-  [`Check in`]: [[`Offer Check 1  `, 100], [`Offer Check 2  `, 110]],
-  [`Sightseeing in`]: [[`Offer Sightseeing 1 `, 50], [`Offer Sightseeing 2 `, 60], [`Offer Sightseeing 3 `, 70]],
-  [`Restaurant in`]: null
+export const CATALOG_OFFERS = {
+  [`Taxi`]: [[`Offer Taxi 1 `, 20], [`Offer Taxi 2 `, 20]],
+  [`Bus`]: null,
+  [`Train`]: [[`Offer Train 1 `, 50], [`Offer Train 2 `, 60]],
+  [`Ship`]: [[`Offer Ship 1 `, 40], [`Offer Ship 2 `, 50]],
+  [`Transport`]: null,
+  [`Drive`]: [[`Offer Drive 1 `, 150], [`Offer Drive 2 `, 160], [`Offer Drive 3 `, 170]],
+  [`Flight`]: [[`Add luggage `, 50], [`Add meal `, 15], [`Switch to comfort `, 100], [`Choose seats `, 5], [`Travel by train `, 40]],
+  [`Check-in`]: [[`Offer Check 1  `, 100], [`Offer Check 2  `, 110]],
+  [`Sightseeing`]: [[`Offer Sightseeing 1 `, 50], [`Offer Sightseeing 2 `, 60], [`Offer Sightseeing 3 `, 70]],
+  [`Restaurant`]: null
 };
 const CITIES = [
   `Vienna`,
@@ -175,13 +178,13 @@ export const generateItemEvent = () => {
 
 // объект с данными по умолчанию - для запуска формы редактирования-создания в момент создания точки
 export const newItemEventDefault = {
-  pointType: `Taxi to`,
+  pointType: `Taxi`,
   iconPoint: `taxi.png`,
   destination: ``,
   timeStart: new Date(),
   timeEnd: new Date(),
   description: ``,
-  availableOffers: CATALOG_OFFERS[`Taxi to`],
+  availableOffers: CATALOG_OFFERS[`Taxi`],
   offer: null,
   photos: [],
   cost: ``,

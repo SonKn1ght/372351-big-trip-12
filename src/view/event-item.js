@@ -1,4 +1,5 @@
 import AbstractView from './abstract.js';
+import {addPreposition} from '../utils/event.js';
 
 export default class EventItem extends AbstractView {
   constructor(itemEvent) {
@@ -67,7 +68,7 @@ export default class EventItem extends AbstractView {
         <div class="event__type">
           <img class="event__type-icon" width="42" height="42" src="img/icons/${iconPoint}" alt="Event type icon">
         </div>
-        <h3 class="event__title">${pointType} ${destination}</h3>
+        <h3 class="event__title">${pointType} ${addPreposition(pointType)} ${destination}</h3>
 
         <div class="event__schedule">
           <p class="event__time">
