@@ -5,7 +5,6 @@ import TripDays from '../view/trip-day.js';
 import EventItemPresenter from './event-item.js';
 import {updateItem} from '../utils/common.js';
 import {remove, render, RenderPosition} from '../utils/render.js';
-import {groupBy} from '../utils/event.js';
 import {SortType} from '../const.js';
 import {sortEventDuration, sortEventPrice} from '../utils/event.js';
 
@@ -32,8 +31,7 @@ export default class Trip {
       this._renderNoEvent();
       return;
     }
-    this._sourcedItemsEvent = itemsEvent;
-    this._itemsEvent = itemsEvent.slice();
+    this._itemsEvent = itemsEvent;
     this._renderSortEvent();
     this._renderTripDays();
     this._renderEventList();
@@ -47,32 +45,30 @@ export default class Trip {
 
   _handleEventItemChange(updatedEventItem) {
     this._itemsEvent = updateItem(this._itemsEvent, updatedEventItem);
-    this._sourcedItemsEvent = updateItem(this._sourcedItemsEvent, updatedEventItem);
     this._eventItemPresenter[updatedEventItem.id].init(updatedEventItem);
   }
 
   _sortTasks(sortType) {
+    const sortingArray = this._itemsEvent.slice();
     switch (sortType) {
       case SortType.DURATION:
-        this._itemsEvent.sort(sortEventDuration);
-        this._renderEventList(true);
+        sortingArray.sort(sortEventDuration);
         break;
       case SortType.PRICE:
-        this._itemsEvent.sort(sortEventPrice);
-        this._renderEventList(true);
+        sortingArray.sort(sortEventPrice);
         break;
-      default: this._renderEventList();
     }
     this._currentSortType = sortType;
+    return sortingArray;
   }
 
   _handleSortTypeChange(sortType) {
     if (this._currentSortType === sortType) {
       return;
     }
-    // убрал отсюда дубль проверки и перенес отрисовку в _sortTasks
     this._clearTripDays();
-    this._sortTasks(sortType);
+    const sortedItemsEvent = this._sortTasks(sortType);
+    this._renderEventList(sortedItemsEvent, this._currentSortType);
   }
 
   _renderNoEvent() {
@@ -112,31 +108,46 @@ export default class Trip {
     this._eventItemPresenter[itemEvent.id] = eventItemPresenter;
   }
 
-  _renderEventList(sorted = null) {
-    // переделал две функции в одну, т.к. вроде одну задачу решают
-    // объявляею переменные вне условий, дабы были они за за блочной область видимости, удобно было бы использовать
-    // внутри if - var, но критерии.
-    let itemsEventByRender;
-    let index;
-    // в завистимости от типа вызова функции присваиваю нужные значения
-    if (!sorted) {
-      itemsEventByRender = Object.entries(groupBy(this._sourcedItemsEvent, `dataSort`));
-      index = 1;
+  _renderEventList(itemsEvent = this._itemsEvent, sort = SortType.DEFAULT) {
+    // в очередной раз переписал эту функцию через set и фильтрацию
+    let uniqueTripDays;
+    let count;
+
+    if (sort === SortType.DEFAULT) {
+      let days = [];
+      for (const item of itemsEvent) {
+        days.push(item.dataSort);
+      }
+      uniqueTripDays = Array.from(new Set(days));
+      count = 1;
     } else {
-      itemsEventByRender = [[``, this._itemsEvent]];
-      index = ``;
+      uniqueTripDays = [``];
+      count = ``;
     }
-    // вызываю отрисовку
-    itemsEventByRender.forEach((current) => {
-      this._eventListElement = new DayItem(index, current[0]);
-      index++;
-      // сохраняем ссылки на дни в отдельное свойство,
-      // ключ - собственно дата, не завожу для нее отдельных функций по генерации ключа
-      // так как она у нас уникальна для каждого дня
-      this._eventListElements[current[0]] = this._eventListElement;
-      render(this._tripDays, this._eventListElement, RenderPosition.BEFOREEND);
-      const tripEventsList = this._eventListElement.getElement().querySelector(`.trip-events__list`);
-      current[1].forEach((point) => {
+
+    uniqueTripDays.forEach((currentDay) => {
+      // создаем день
+      const eventListElement = new DayItem(count, currentDay);
+      count++;
+      // сохраняем ссылку на него для удаления
+      this._eventListElements[currentDay] = eventListElement;
+
+      // рисуем день
+      render(this._tripDays, eventListElement, RenderPosition.BEFOREEND);
+      // находим в дне элемент в который пишем точки
+      const tripEventsList = eventListElement.getElement().querySelector(`.trip-events__list`);
+      // пишем в переменную точки
+      let currentDayItemsEvent = itemsEvent;
+      if (sort === SortType.DEFAULT) {
+        // получем точки только для этого дня если рисовка по умолчанию
+        currentDayItemsEvent = itemsEvent
+          .slice()
+          .filter((itemEvent) => {
+            return itemEvent.dataSort === currentDay;
+          });
+      }
+      // рисуем точки по итоговым данным
+      currentDayItemsEvent.forEach((point) => {
         this._renderEventItem(tripEventsList, point);
       });
     });

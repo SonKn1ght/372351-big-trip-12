@@ -57,11 +57,11 @@ export default class EventEdit extends SmartView {
       return result;
     };
 
-    const renderAvailablePoints = (pointsType, identifier) => {
+    const renderAvailablePoints = (pointsType, identifier, selectedType) => {
       return pointsType.reduce((result, type) => {
         return (
           result + `<div class="event__type-item">
-        <input id="event-type-${type}-${identifier}" class="event__type-input  visually-hidden" type="radio" name="event-type" value="${type}">
+        <input id="event-type-${type}-${identifier}" class="event__type-input  visually-hidden" type="radio" name="event-type" value="${type}" ${(type === selectedType) ? `checked` : ``}>
           <label class="event__type-label  event__type-label--${type.toLowerCase()}" for="event-type-${type}-${identifier}">${type}</label>
       </div>`
         );
@@ -83,11 +83,11 @@ export default class EventEdit extends SmartView {
             <fieldset class="event__type-group">
               <legend class="visually-hidden">Transfer</legend>
 
-              ${renderAvailablePoints(TRANSFER_POINTS, id)}
+              ${renderAvailablePoints(TRANSFER_POINTS, id, pointType)}
             </fieldset>
             <fieldset class="event__type-group">
               <legend class="visually-hidden">Activity</legend>
-              ${renderAvailablePoints(ACTIVITY_POINTS, id)}
+              ${renderAvailablePoints(ACTIVITY_POINTS, id, pointType)}
             </fieldset>
           </div>
         </div>
