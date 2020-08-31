@@ -77,7 +77,9 @@ export default class Trip {
 
   _renderSortEvent() {
     render(this._tripContainer, this._sortEvent, RenderPosition.BEFOREEND);
-    this._sortEvent.setSortTypeChangeHandler(this._handleSortTypeChange);
+    this._sortEvent.getElement().addEventListener(`change`, (evt) => {
+      this._handleSortTypeChange(evt.target.dataset.sortType);
+    });
   }
 
   _renderTripDays() {

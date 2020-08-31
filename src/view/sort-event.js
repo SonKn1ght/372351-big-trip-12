@@ -2,11 +2,6 @@ import AbstractView from './abstract.js';
 import {SortType} from '../const.js';
 
 export default class SortEvent extends AbstractView {
-  constructor() {
-    super();
-
-    this._sortTypeChangeHandler = this._sortTypeChangeHandler.bind(this);
-  }
   _getTemplate() {
     return `<form class="trip-events__trip-sort  trip-sort" action="#" method="get">
       <span class="trip-sort__item  trip-sort__item--day">Day</span>
@@ -38,16 +33,5 @@ export default class SortEvent extends AbstractView {
 
       <span class="trip-sort__item  trip-sort__item--offers">Offers</span>
     </form>`;
-  }
-
-  _sortTypeChangeHandler(evt) {
-    evt.preventDefault();
-    this._callback.sortTypeChange(evt.target.dataset.sortType);
-  }
-
-  setSortTypeChangeHandler(callback) {
-    // тут изменил событие сам принцип установки и передачи не трогал
-    this._callback.sortTypeChange = callback;
-    this.getElement().addEventListener(`change`, this._sortTypeChangeHandler);
   }
 }
