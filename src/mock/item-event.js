@@ -97,15 +97,12 @@ const generateTime = (param) => {
   }
   // создаем конец события начало события + интервал от 1 го до 6 часов, добавил разброс для теста сортировки
   const timeEnd = new Date((timeStart.getTime() + (getRandomInteger(1, 40) * 60 * 60 * 1000)));
-  // получаем разницу между началом и концом в милисекундах
-  const differenceTime = timeEnd - timeStart;
   // обновляем переменную => внешний накопитель даты
   timeAccumulator = timeEnd.getTime();
   // записываем все в объект для выдачи из функции
   return {
     timeStart,
-    timeEnd,
-    differenceTime
+    timeEnd
   };
 };
 
@@ -156,7 +153,7 @@ export const generateItemEvent = () => {
   const pointType = generatePointType();
   const offer = generateOffer(pointType, CATALOG_OFFERS);
   const iconPoint = ICONS[pointType];
-  const {timeStart, timeEnd, differenceTime} = generateTime(timeAccumulator);
+  const {timeStart, timeEnd} = generateTime(timeAccumulator);
   const availableOffers = CATALOG_OFFERS[pointType];
   return {
     id: generateId(),
@@ -166,7 +163,6 @@ export const generateItemEvent = () => {
     destination: generateCity(),
     timeStart,
     timeEnd,
-    differenceTime,
     offer,
     availableOffers,
     description: generateDescription(),

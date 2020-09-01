@@ -1,16 +1,23 @@
 import {newItemEventDefault, TRANSFER_POINTS, ACTIVITY_POINTS, CATALOG_OFFERS, ICONS} from '../mock/item-event.js';
 import SmartView from './smart.js';
 import {addPreposition} from '../utils/event.js';
+import flatpickr from 'flatpickr';
+import '../../node_modules/flatpickr/dist/flatpickr.min.css';
 
 export default class EventEdit extends SmartView {
   constructor(itemEvent = newItemEventDefault) {
     super();
     this._data = itemEvent;
+    this._dataPickerStart = null;
+    this._dataPickerEnd = null;
 
     this._formSubmitHandler = this._formSubmitHandler.bind(this);
     this._eventSelectionHandler = this._eventSelectionHandler.bind(this);
     this._favoriteClickHandler = this._favoriteClickHandler.bind(this);
     this._setInnerHandlers();
+    this._startTimeHandler = this._startTimeHandler.bind(this);
+    this._endTimeHandler = this._endTimeHandler.bind(this);
+    this._setDatapickers();
   }
 
   reset(itemEvent) {
@@ -22,7 +29,7 @@ export default class EventEdit extends SmartView {
 
     const formateDate = (date) => {
       // В британском английском используется порядок день-месяц-год
-      let str = date.toLocaleString(`en-GB`, {day: `2-digit`, month: `2-digit`, year: `2-digit`, hour12: false, hour: `2-digit`, minute: `2-digit`});
+      let str = date.toLocaleString(`en-GB`, {day: `2-digit`, month: `2-digit`, year: `numeric`, hour12: false, hour: `2-digit`, minute: `2-digit`});
       return str.replace(`,`, ``);
     };
 
@@ -172,12 +179,59 @@ export default class EventEdit extends SmartView {
     this._setInnerHandlers();
     this.setFormSubmitHandler(this._callback.formSubmit);
     this.setFavoriteClickHandler(this._callback.favoriteClick);
+    this._setDatapickers();
+  }
+
+  _setDatapicker(property, data, selector, callback, minimumDate = false) {
+    if (property) {
+      property.destroy();
+      property = null;
+    }
+
+    if (data) {
+      this._dataPickerStart = flatpickr(
+          this.getElement().querySelector(selector),
+          {
+            dateFormat: `d/m/Y H:m`,
+            enableTime: true,
+            defaultDate: data,
+            onClose: callback,
+            minDate: minimumDate,
+          }
+      );
+    }
+  }
+
+  _setDatapickers() {
+    this._setDatapicker(this._dataPickerStart, this._data.timeStart, `#event-start-time-1`, this._startTimeHandler);
+    this._setDatapicker(this._dataPickerEnd, this._data.timeEnd, `#event-end-time-1`, this._endTimeHandler, this._data.timeStart);
   }
 
   _setInnerHandlers() {
     this.getElement()
       .querySelector(`.event__type-list`)
       .addEventListener(`change`, this._eventSelectionHandler);
+  }
+
+  _startTimeHandler([userDate]) {
+    // делаем дату конца равной дате начала если => дата начала назначена хронологически позже даты конца
+    if (userDate > this._data.timeEnd) {
+      this.updateData({
+        timeStart: userDate,
+        timeEnd: userDate
+      });
+    } else {
+      this.updateData({
+        timeStart: userDate
+      });
+    }
+
+  }
+
+  _endTimeHandler([userDate]) {
+    this.updateData({
+      timeEnd: userDate
+    });
   }
 
   _eventSelectionHandler(evt) {
