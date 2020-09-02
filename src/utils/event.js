@@ -3,7 +3,7 @@ import {addZero} from './common.js';
 import moment from 'moment';
 
 export const sortEventDuration = (eventA, eventB) => {
-  return eventB.differenceTime - eventA.differenceTime;
+  return (eventA.timeStart - eventA.timeEnd) - (eventB.timeStart - eventB.timeEnd);
 };
 
 // в т.з. явно не описано, сортирую по стоимости точки, без учета стоимости предложений

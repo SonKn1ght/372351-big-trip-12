@@ -49,23 +49,22 @@ export default class Trip {
   }
 
   _sortTasks(sortType) {
-    const sortingArray = this._itemsEvent.slice();
+    const dataToSort = this._itemsEvent.slice();
     switch (sortType) {
       case SortType.DURATION:
-        sortingArray.sort(sortEventDuration);
-        break;
+        return dataToSort.sort(sortEventDuration);
       case SortType.PRICE:
-        sortingArray.sort(sortEventPrice);
-        break;
+        return dataToSort.sort(sortEventPrice);
+      default: return dataToSort;
     }
-    this._currentSortType = sortType;
-    return sortingArray;
   }
 
   _handleSortTypeChange(sortType) {
     if (this._currentSortType === sortType) {
       return;
     }
+    // убрал запись в текущий тип сюда, что б не было ничего лишнего в самой сортировке, т.е. использовать ее как раз как функцию
+    this._currentSortType = sortType;
     this._clearTripDays();
     const sortedItemsEvent = this._sortTasks(sortType);
     this._renderEventList(sortedItemsEvent, this._currentSortType);
