@@ -1,15 +1,24 @@
-import {newItemEventDefault} from '../mock/item-event.js';
-import AbstractView from './abstract.js';
+import {newItemEventDefault, TRANSFER_POINTS, ACTIVITY_POINTS, CATALOG_OFFERS, ICONS} from '../mock/item-event.js';
+import SmartView from './smart.js';
+import {addPreposition} from '../utils/event.js';
 
-export default class EventEdit extends AbstractView {
+export default class EventEdit extends SmartView {
   constructor(itemEvent = newItemEventDefault) {
     super();
-    this._itemEvent = itemEvent;
+    this._data = itemEvent;
+
     this._formSubmitHandler = this._formSubmitHandler.bind(this);
+    this._eventSelectionHandler = this._eventSelectionHandler.bind(this);
+    this._favoriteClickHandler = this._favoriteClickHandler.bind(this);
+    this._setInnerHandlers();
+  }
+
+  reset(itemEvent) {
+    this.updateData(itemEvent);
   }
 
   _getTemplate() {
-    const {pointType, iconPoint, destination, timeStart, timeEnd, description, availableOffers, offer, photos, cost} = this._itemEvent;
+    const {id, pointType, iconPoint, destination, timeStart, timeEnd, description, availableOffers, offer, photos, cost, isFavorite} = this._data;
 
     const formateDate = (date) => {
       // В британском английском используется порядок день-месяц-год
@@ -18,11 +27,9 @@ export default class EventEdit extends AbstractView {
     };
 
     const renderPhotos = (allPhotos) => {
-      let result = ``;
-      for (const photo of allPhotos) {
-        result += `<img class="event__photo" src="${photo}" alt="Event photo">`;
-      }
-      return result;
+      return allPhotos.reduce((result, photo) => {
+        return (result + `<img class="event__photo" src="${photo}" alt="Event photo">`);
+      }, ``);
     };
 
     const renderOffers = (offers) => {
@@ -50,6 +57,17 @@ export default class EventEdit extends AbstractView {
       return result;
     };
 
+    const renderAvailablePoints = (pointsType, identifier, selectedType) => {
+      return pointsType.reduce((result, type) => {
+        return (
+          result + `<div class="event__type-item">
+        <input id="event-type-${type}-${identifier}" class="event__type-input  visually-hidden" type="radio" name="event-type" value="${type}" ${(type === selectedType) ? `checked` : ``}>
+          <label class="event__type-label  event__type-label--${type.toLowerCase()}" for="event-type-${type}-${identifier}">${type}</label>
+      </div>`
+        );
+      }, ``);
+    };
+
     return (
       `<li class="trip-events__item">
          <form class="trip-events__item  event  event--edit" action="#" method="post">
@@ -65,66 +83,18 @@ export default class EventEdit extends AbstractView {
             <fieldset class="event__type-group">
               <legend class="visually-hidden">Transfer</legend>
 
-              <div class="event__type-item">
-                <input id="event-type-taxi-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="taxi">
-                <label class="event__type-label  event__type-label--taxi" for="event-type-taxi-1">Taxi</label>
-              </div>
-
-              <div class="event__type-item">
-                <input id="event-type-bus-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="bus">
-                <label class="event__type-label  event__type-label--bus" for="event-type-bus-1">Bus</label>
-              </div>
-
-              <div class="event__type-item">
-                <input id="event-type-train-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="train">
-                <label class="event__type-label  event__type-label--train" for="event-type-train-1">Train</label>
-              </div>
-
-              <div class="event__type-item">
-                <input id="event-type-ship-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="ship">
-                <label class="event__type-label  event__type-label--ship" for="event-type-ship-1">Ship</label>
-              </div>
-
-              <div class="event__type-item">
-                <input id="event-type-transport-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="transport">
-                <label class="event__type-label  event__type-label--transport" for="event-type-transport-1">Transport</label>
-              </div>
-
-              <div class="event__type-item">
-                <input id="event-type-drive-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="drive">
-                <label class="event__type-label  event__type-label--drive" for="event-type-drive-1">Drive</label>
-              </div>
-
-              <div class="event__type-item">
-                <input id="event-type-flight-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="flight" checked>
-                <label class="event__type-label  event__type-label--flight" for="event-type-flight-1">Flight</label>
-              </div>
+              ${renderAvailablePoints(TRANSFER_POINTS, id, pointType)}
             </fieldset>
-
             <fieldset class="event__type-group">
               <legend class="visually-hidden">Activity</legend>
-
-              <div class="event__type-item">
-                <input id="event-type-check-in-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="check-in">
-                <label class="event__type-label  event__type-label--check-in" for="event-type-check-in-1">Check-in</label>
-              </div>
-
-              <div class="event__type-item">
-                <input id="event-type-sightseeing-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="sightseeing">
-                <label class="event__type-label  event__type-label--sightseeing" for="event-type-sightseeing-1">Sightseeing</label>
-              </div>
-
-              <div class="event__type-item">
-                <input id="event-type-restaurant-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="restaurant">
-                <label class="event__type-label  event__type-label--restaurant" for="event-type-restaurant-1">Restaurant</label>
-              </div>
+              ${renderAvailablePoints(ACTIVITY_POINTS, id, pointType)}
             </fieldset>
           </div>
         </div>
 
         <div class="event__field-group  event__field-group--destination">
           <label class="event__label  event__type-output" for="event-destination-1">
-            ${pointType}
+            ${pointType} ${addPreposition(pointType)}
           </label>
           <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${destination}" list="destination-list-1">
           <datalist id="destination-list-1">
@@ -156,7 +126,19 @@ export default class EventEdit extends AbstractView {
         </div>
 
         <button class="event__save-btn  btn  btn--blue" type="submit">Save</button>
-        <button class="event__reset-btn" type="reset">Cancel</button>
+        <button class="event__reset-btn" type="reset">Delete</button>
+
+        <input id="event-favorite-1" class="event__favorite-checkbox  visually-hidden" type="checkbox" name="event-favorite" ${isFavorite ? `checked` : ``}>
+        <label class="event__favorite-btn" for="event-favorite-1">
+          <span class="visually-hidden">Add to favorite</span>
+          <svg class="event__favorite-icon" width="28" height="28" viewBox="0 0 28 28">
+            <path d="M14 21l-8.22899 4.3262 1.57159-9.1631L.685209 9.67376 9.8855 8.33688 14 0l4.1145 8.33688 9.2003 1.33688-6.6574 6.48934 1.5716 9.1631L14 21z"/>
+          </svg>
+        </label>
+
+        <button class="event__rollup-btn" type="button">
+          <span class="visually-hidden">Open event</span>
+        </button>
       </header>
       <section class="event__details">
         <section class="event__section  event__section--offers">
@@ -183,14 +165,45 @@ export default class EventEdit extends AbstractView {
     );
   }
 
+  restoreHandlers() {
+    this._setInnerHandlers();
+    this.setFormSubmitHandler(this._callback.formSubmit);
+    this.setFavoriteClickHandler(this._callback.favoriteClick);
+  }
+
+  _setInnerHandlers() {
+    this.getElement()
+      .querySelector(`.event__type-list`)
+      .addEventListener(`change`, this._eventSelectionHandler);
+  }
+
+  _eventSelectionHandler(evt) {
+    evt.preventDefault();
+    this.updateData({
+      pointType: evt.target.value,
+      availableOffers: CATALOG_OFFERS[evt.target.value],
+      iconPoint: ICONS[evt.target.value]
+    });
+  }
+
   _formSubmitHandler(evt) {
     evt.preventDefault();
-    this._callback.formSubmit();
+    this._callback.formSubmit(this._data);
+  }
+
+  _favoriteClickHandler(evt) {
+    evt.preventDefault();
+    this._callback.favoriteClick();
   }
 
   setFormSubmitHandler(callback) {
     this._callback.formSubmit = callback;
     this.getElement().querySelector(`form`).addEventListener(`submit`, this._formSubmitHandler);
+  }
+
+  setFavoriteClickHandler(callback) {
+    this._callback.favoriteClick = callback;
+    this.getElement().querySelector(`.event__favorite-btn`).addEventListener(`click`, this._favoriteClickHandler);
   }
 }
 
