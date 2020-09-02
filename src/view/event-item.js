@@ -10,7 +10,7 @@ export default class EventItem extends AbstractView {
   }
 
   _getTemplate() {
-    const {pointType, iconPoint, destination, timeStart, timeEnd, differenceTime, offer, cost} = this._itemEvent;
+    const {pointType, iconPoint, destination, timeStart, timeEnd, offer, cost} = this._itemEvent;
     const createOffersTemplate = (offers) => {
       if (!offers) {
         return ``;
