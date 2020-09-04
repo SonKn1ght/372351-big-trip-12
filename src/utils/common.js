@@ -35,3 +35,13 @@ export const updateItem = (items, update) => {
   ];
 };
 
+// добавляем ноль спереди если его нет
+export const addZero = (number) => {
+  let numberCurrent = String(number);
+  const twoDigit = 2;
+  if (numberCurrent.length === twoDigit) {
+    return number;
+  }
+  numberCurrent = `0${number}`;
+  return numberCurrent;
+};

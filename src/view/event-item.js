@@ -1,5 +1,6 @@
 import AbstractView from './abstract.js';
 import {addPreposition} from '../utils/event.js';
+import {formatEventDuration} from '../utils/event.js';
 
 export default class EventItem extends AbstractView {
   constructor(itemEvent) {
@@ -9,7 +10,7 @@ export default class EventItem extends AbstractView {
   }
 
   _getTemplate() {
-    const {pointType, iconPoint, destination, timeStart, timeEnd, differenceTime, offer, cost} = this._itemEvent;
+    const {pointType, iconPoint, destination, timeStart, timeEnd, offer, cost} = this._itemEvent;
     const createOffersTemplate = (offers) => {
       if (!offers) {
         return ``;
@@ -35,33 +36,6 @@ export default class EventItem extends AbstractView {
       return time.toISOString().slice(0, 16);
     };
 
-    const convertMS = (millisecond) => {
-      let minutes = Math.floor(millisecond / 60000);
-      let hours = ``;
-      let days = ``;
-      if (minutes > 59) {
-        hours = Math.floor(minutes / 60);
-        minutes = minutes - (hours * 60);
-        if (hours > 23) {
-          days = Math.floor(hours / 24);
-          hours = hours - (days * 24);
-        }
-      }
-      hours = (hours > 9) ? hours : `0${hours}`;
-      minutes = (minutes > 9) ? minutes : `0${minutes}`;
-      days = (days > 9) ? days : `0${days}`;
-
-
-      if (days !== `0`) {
-        return `${days}D ${hours}H ${minutes}M`;
-      }
-
-      if (hours !== `0`) {
-        return `${hours}H ${minutes}M`;
-      }
-      return `${minutes}M`;
-    };
-
     return (
       `<li class="trip-events__item">
       <div class="event">
@@ -76,7 +50,7 @@ export default class EventItem extends AbstractView {
             &mdash;
             <time class="event__end-time" datetime="${formattingDateTime(timeEnd)}">${humanizeDate(timeEnd)}</time>
           </p>
-          <p class="event__duration">${convertMS(differenceTime)}</p>
+          <p class="event__duration">${formatEventDuration(timeStart, timeEnd)}</p>
         </div>
 
         <p class="event__price">
