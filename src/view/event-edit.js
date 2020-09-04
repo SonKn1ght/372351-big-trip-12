@@ -3,6 +3,7 @@ import SmartView from './smart.js';
 import {addPreposition} from '../utils/event.js';
 import flatpickr from 'flatpickr';
 import '../../node_modules/flatpickr/dist/flatpickr.min.css';
+import {dayDate} from "../utils/common";
 
 export default class EventEdit extends SmartView {
   constructor(itemEvent = newItemEventDefault) {
@@ -12,7 +13,9 @@ export default class EventEdit extends SmartView {
     this._dataPickerEnd = null;
 
     this._formSubmitHandler = this._formSubmitHandler.bind(this);
+    this._eventDeleteHandler = this._eventDeleteHandler.bind(this);
     this._eventSelectionHandler = this._eventSelectionHandler.bind(this);
+    this._costInputHandler = this._costInputHandler.bind(this);
     this._favoriteClickHandler = this._favoriteClickHandler.bind(this);
     this._setInnerHandlers();
     this._startTimeHandler = this._startTimeHandler.bind(this);
@@ -129,7 +132,7 @@ export default class EventEdit extends SmartView {
             <span class="visually-hidden">Price</span>
             &euro;
           </label>
-          <input class="event__input  event__input--price" id="event-price-1" type="text" name="event-price" value="${cost}">
+          <input class="event__input  event__input--price" id="event-price-1" type="number" name="event-price" value="${cost}">
         </div>
 
         <button class="event__save-btn  btn  btn--blue" type="submit">Save</button>
@@ -175,6 +178,7 @@ export default class EventEdit extends SmartView {
   restoreHandlers() {
     this._setInnerHandlers();
     this.setFormSubmitHandler(this._callback.formSubmit);
+    this.setEventDeleteHandler(this._callback.eventDelete);
     this.setFavoriteClickHandler(this._callback.favoriteClick);
     this._setDatapickers();
   }
@@ -208,6 +212,9 @@ export default class EventEdit extends SmartView {
     this.getElement()
       .querySelector(`.event__type-list`)
       .addEventListener(`change`, this._eventSelectionHandler);
+    this.getElement()
+      .querySelector(`.event__input--price`)
+      .addEventListener(`input`, this._costInputHandler);
   }
 
   _startTimeHandler([userDate]) {
@@ -215,11 +222,13 @@ export default class EventEdit extends SmartView {
     if (userDate > this._data.timeEnd) {
       this.updateData({
         timeStart: userDate,
+        dataSort: dayDate(userDate),
         timeEnd: userDate
       });
     } else {
       this.updateData({
-        timeStart: userDate
+        timeStart: userDate,
+        dataSort: dayDate(userDate)
       });
     }
 
@@ -240,9 +249,21 @@ export default class EventEdit extends SmartView {
     });
   }
 
+  _costInputHandler(evt) {
+    evt.preventDefault();
+    this.updateData({
+      cost: evt.target.value
+    }, true);
+  }
+
   _formSubmitHandler(evt) {
     evt.preventDefault();
     this._callback.formSubmit(this._data);
+  }
+
+  _eventDeleteHandler(evt) {
+    evt.preventDefault();
+    this._callback.eventDelete(this._data);
   }
 
   _favoriteClickHandler(evt) {
@@ -253,6 +274,11 @@ export default class EventEdit extends SmartView {
   setFormSubmitHandler(callback) {
     this._callback.formSubmit = callback;
     this.getElement().querySelector(`form`).addEventListener(`submit`, this._formSubmitHandler);
+  }
+
+  setEventDeleteHandler(callback) {
+    this._callback.eventDelete = callback;
+    this.getElement().querySelector(`.event__reset-btn`).addEventListener(`click`, this._eventDeleteHandler);
   }
 
   setFavoriteClickHandler(callback) {

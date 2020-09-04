@@ -1,6 +1,7 @@
 import {render, RenderPosition, replace, remove} from '../utils/render.js';
 import EventEditView from '../view/event-edit.js';
 import EventItemView from '../view/event-item.js';
+import {UserAction, UpdateType} from '../const.js';
 
 const Mode = {
   DEFAULT: `DEFAULT`,
@@ -19,6 +20,7 @@ export default class EventItem {
 
     this._handleEditClick = this._handleEditClick.bind(this);
     this._handleFormSubmit = this._handleFormSubmit.bind(this);
+    this._handleDeleteClick = this._handleDeleteClick.bind(this);
     this._escKeyDownHandler = this._escKeyDownHandler.bind(this);
     this._handleFavoriteClick = this._handleFavoriteClick.bind(this);
   }
@@ -34,6 +36,7 @@ export default class EventItem {
 
     this._itemEventComponent.setEditClickHandler(this._handleEditClick);
     this._eventEditComponent.setFormSubmitHandler(this._handleFormSubmit);
+    this._eventEditComponent.setEventDeleteHandler(this._handleDeleteClick);
     this._eventEditComponent.setFavoriteClickHandler(this._handleFavoriteClick);
 
 
@@ -90,13 +93,27 @@ export default class EventItem {
     this._replaceEventToEdit();
   }
 
-  _handleFormSubmit(task) {
-    this._changeData(task);
+  _handleFormSubmit(eventItem) {
+    // не забыть завести проверку на минор-мажор
+    this._changeData(
+        UserAction.UPDATE_EVENT_ITEM,
+        UpdateType.MAJOR,
+        eventItem);
     this._replaceEditToEvent();
+  }
+
+  _handleDeleteClick(eventItem) {
+    this._changeData(
+        UserAction.DELETE_EVENT_ITEM,
+        UpdateType.MAJOR,
+        eventItem
+    );
   }
 
   _handleFavoriteClick() {
     this._changeData(
+        UserAction.UPDATE_EVENT_ITEM,
+        UpdateType.MINOR,
         Object.assign(
             {}, this._itemEvent, {isFavorite: !this._itemEvent.isFavorite}
         )

@@ -2,6 +2,10 @@ import {ACTIVITY_POINTS} from "../mock/item-event";
 import {addZero} from './common.js';
 import moment from 'moment';
 
+export const sortDefault = (eventA, eventB) => {
+  return eventA.timeStart - eventB.timeStart;
+};
+
 export const sortEventDuration = (eventA, eventB) => {
   return (eventA.timeStart - eventA.timeEnd) - (eventB.timeStart - eventB.timeEnd);
 };

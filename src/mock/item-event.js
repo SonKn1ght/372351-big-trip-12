@@ -88,12 +88,13 @@ const generateCity = () => {
 };
 
 const generateTime = (param) => {
-  // создаем начало события => дата предыдушего события + 2 часа
+
   let timeStart = new Date((param + (2 * 60 * 60 * 1000)));
 
   // это для установки даты на первой итерации текущая дата + 1 час
   if (param === 0) {
-    timeStart = new Date((Date.now() + (60 * 60 * 1000)));
+    // для получения данных в прошлом не мудрствовал лукаво
+    timeStart = new Date((Date.now() - (3 * 24 * 60 * 60 * 1000)));
   }
   // создаем конец события начало события + интервал от 1 го до 6 часов, добавил разброс для теста сортировки
   const timeEnd = new Date((timeStart.getTime() + (getRandomInteger(1, 40) * 60 * 60 * 1000)));
