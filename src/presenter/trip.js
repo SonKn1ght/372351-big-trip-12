@@ -3,8 +3,9 @@ import NoEvent from '../view/no-event.js';
 import SortEvent from '../view/sort-event.js';
 import TripDays from '../view/trip-day.js';
 import EventItemPresenter from './event-item.js';
+import EventItemNewPresenter from './event-item-new.js';
 import {remove, render, RenderPosition} from '../utils/render.js';
-import {SortType, UpdateType, UserAction} from '../const.js';
+import {FilterType, SortType, UpdateType, UserAction} from '../const.js';
 import {sortEventDuration, sortEventPrice, sortDefault} from '../utils/event.js';
 import {filter} from '../utils/filter.js';
 
@@ -27,13 +28,22 @@ export default class Trip {
     this._handleModelEvent = this._handleModelEvent.bind(this);
     this._handleSortTypeChange = this._handleSortTypeChange.bind(this);
     this._handleModeChange = this._handleModeChange.bind(this);
+
     this._eventItemsModel.addObserver(this._handleModelEvent);
     this._filterModel.addObserver(this._handleModelEvent);
+
+    this._eventItemNewPresenter = new EventItemNewPresenter(this._tripContainer, this._handleViewAction, this._availableOffersModel);
   }
 
   init() {
-    // странновато,если не будет сюда добавок убрать лишний метод
+    // странновато, если не будет сюда добавок убрать лишний метод
     this._renderEventsElement();
+  }
+
+  createEventItems() {
+    this._currentSortType = SortType.DEFAULT;
+    this._filterModel.setFilter(UpdateType.MAJOR, FilterType.EVERYTHING);
+    this._eventItemNewPresenter.init();
   }
 
   _getEventItems() {
@@ -51,6 +61,7 @@ export default class Trip {
   }
 
   _handleModeChange() {
+    this._eventItemNewPresenter.destroy();
     Object
       .values(this._eventItemPresenter)
       .forEach((presenter) => presenter.resetView());
@@ -159,14 +170,13 @@ export default class Trip {
       }
       // рисуем точки по итоговым данным
       currentDayItemsEvent.forEach((point) => {
-        // получаем доступные офферы для текущей точки и передаем их в рендер метод
-        const availableOffers = this._availableOffersModel.getAvailableOffers(point[`pointType`]);
-        this._renderEventItem(tripEventsList, point, availableOffers);
+        this._renderEventItem(tripEventsList, point, this._availableOffersModel);
       });
     });
   }
 
   _clearEventsElement() {
+    this._eventItemNewPresenter.destroy();
     Object
       .values(this._eventItemPresenter)
       .forEach((presenter) => {

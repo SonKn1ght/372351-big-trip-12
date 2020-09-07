@@ -4,12 +4,13 @@ import {addPreposition} from '../utils/event.js';
 import flatpickr from 'flatpickr';
 import '../../node_modules/flatpickr/dist/flatpickr.min.css';
 import {dayDate, checkForElementArray} from '../utils/common.js';
-import {CATALOG_OFFERS} from '../mock/offers.js';
 
 export default class EventEdit extends SmartView {
-  constructor(itemEvent = newItemEventDefault, availableOffers) {
+
+  constructor(availableOffers, itemEvent = newItemEventDefault, newEvent = false) {
     super();
     this._data = itemEvent;
+    this._newEvent = newEvent;
     this._availableOffers = availableOffers;
     this._dataPickerStart = null;
     this._dataPickerEnd = null;
@@ -32,7 +33,7 @@ export default class EventEdit extends SmartView {
 
   _getTemplate() {
     const {id, pointType, iconPoint, destination, timeStart, timeEnd, description, offer, photos, cost, isFavorite} = this._data;
-    const availableOffers = this._availableOffers;
+    const availableOffers = this._availableOffers.getAvailableOffers(pointType);
 
     const formateDate = (date) => {
       // В британском английском используется порядок день-месяц-год
@@ -88,9 +89,7 @@ export default class EventEdit extends SmartView {
       }, ``);
     };
 
-    return (
-      `<li class="trip-events__item">
-         <form class="trip-events__item  event  event--edit" action="#" method="post">
+    const bodyTemplate = `<form class="trip-events__item  event  event--edit" action="#" method="post">
       <header class="event__header">
         <div class="event__type-wrapper">
           <label class="event__type  event__type-btn" for="event-type-toggle-1">
@@ -180,9 +179,15 @@ export default class EventEdit extends SmartView {
           </div>
         </section>
       </section>
-    </form>
-</li>`
-    );
+    </form>`;
+
+    if (this._newEvent) {
+      return bodyTemplate;
+    }
+
+    return `<li class="trip-events__item">
+       ${bodyTemplate}
+       </li>`;
   }
 
   restoreHandlers() {
@@ -260,7 +265,7 @@ export default class EventEdit extends SmartView {
     evt.preventDefault();
     this.updateData({
       pointType: evt.target.value,
-      availableOffers: CATALOG_OFFERS[evt.target.value],
+      offer: null,
       iconPoint: ICONS[evt.target.value]
     });
   }
@@ -303,7 +308,7 @@ export default class EventEdit extends SmartView {
 
   setFormSubmitHandler(callback) {
     this._callback.formSubmit = callback;
-    this.getElement().querySelector(`form`).addEventListener(`submit`, this._formSubmitHandler);
+    this.getElement().addEventListener(`submit`, this._formSubmitHandler);
   }
 
   setEventDeleteHandler(callback) {

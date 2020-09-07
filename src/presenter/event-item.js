@@ -26,14 +26,11 @@ export default class EventItem {
   }
 
   init(itemEvent, availableOffers) {
-    this._itemEvent = itemEvent;
-    this._availableOffers = availableOffers;
-
     const prevEventItemComponent = this._itemEventComponent;
     const prevEventEditComponent = this._eventEditComponent;
 
     this._itemEventComponent = new EventItemView(itemEvent, availableOffers);
-    this._eventEditComponent = new EventEditView(itemEvent, availableOffers);
+    this._eventEditComponent = new EventEditView(availableOffers, itemEvent);
 
     this._itemEventComponent.setEditClickHandler(this._handleEditClick);
     this._eventEditComponent.setFormSubmitHandler(this._handleFormSubmit);

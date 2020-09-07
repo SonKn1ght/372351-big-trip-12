@@ -23,7 +23,7 @@ const filterModel = new FilterModel();
 const mainElement = document.querySelector(`.trip-main`);
 const controlElement = mainElement.querySelector(`.trip-controls`);
 
-render(mainElement, new TripInfo(itemsEvent, ), RenderPosition.AFTERBEGIN);
+render(mainElement, new TripInfo(itemsEvent), RenderPosition.AFTERBEGIN);
 
 const tabs = new Tabs();
 render(controlElement, tabs.getElementBeforeTitle(), RenderPosition.BEFOREEND);
@@ -36,5 +36,10 @@ const eventsElement = document.querySelector(`.trip-events`);
 
 const tripPresenter = new TripPresenter(eventsElement, eventItemsModel, filterModel, availableOffersModel);
 tripPresenter.init();
+
+document.querySelector(`.trip-main__event-add-btn`).addEventListener(`click`, (evt) => {
+  evt.preventDefault();
+  tripPresenter.createEventItems();
+});
 
 
