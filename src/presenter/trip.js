@@ -10,9 +10,10 @@ import {filter} from '../utils/filter.js';
 
 
 export default class Trip {
-  constructor(tripContainer, eventItemsModel, filterModel) {
+  constructor(tripContainer, eventItemsModel, filterModel, availableOffersModel) {
     this._eventItemsModel = eventItemsModel;
     this._filterModel = filterModel;
+    this._availableOffersModel = availableOffersModel;
     this._tripContainer = tripContainer;
     this._currentSortType = SortType.DEFAULT;
 
@@ -31,6 +32,7 @@ export default class Trip {
   }
 
   init() {
+    // странновато,если не будет сюда добавок убрать лишний метод
     this._renderEventsElement();
   }
 
@@ -44,7 +46,7 @@ export default class Trip {
       case SortType.PRICE:
         return filteredEventItems.sort(sortEventPrice);
     }
-    // добавил сортировку по дефолту, в хронологическом порядке старта события. пока моки оставлю так, потом посмотрю что будут присылать с сервера
+    // добавил сортировку по дефолту, в хронологическом порядке старта события.
     return filteredEventItems.sort(sortDefault);
   }
 
@@ -113,9 +115,9 @@ export default class Trip {
     render(this._tripContainer, this._tripDaysComponent, RenderPosition.BEFOREEND);
   }
 
-  _renderEventItem(eventListElement, itemEvent) {
+  _renderEventItem(eventListElement, itemEvent, availableOffers) {
     const eventItemPresenter = new EventItemPresenter(eventListElement, this._handleViewAction, this._handleModeChange);
-    eventItemPresenter.init(itemEvent);
+    eventItemPresenter.init(itemEvent, availableOffers);
     // сохраняем ссылки на точки в отдельное свойство
     this._eventItemPresenter[itemEvent.id] = eventItemPresenter;
   }
@@ -157,7 +159,9 @@ export default class Trip {
       }
       // рисуем точки по итоговым данным
       currentDayItemsEvent.forEach((point) => {
-        this._renderEventItem(tripEventsList, point);
+        // получаем доступные офферы для текущей точки и передаем их в рендер метод
+        const availableOffers = this._availableOffersModel.getAvailableOffers(point[`pointType`]);
+        this._renderEventItem(tripEventsList, point, availableOffers);
       });
     });
   }

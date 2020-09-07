@@ -38,3 +38,14 @@ export const doFirstUpperCase = (str) => {
   }
   return str[0].toUpperCase() + str.slice(1).toLowerCase();
 };
+
+export const checkForElementArray = (array, element) => {
+  if (array.includes(element)) {
+    let result = array.filter((current) => {
+      return current !== element;
+    });
+    return result;
+  }
+  array.push(element);
+  return array;
+};

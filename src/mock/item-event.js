@@ -1,4 +1,5 @@
 import {getRandomInteger, shuffleArray, dayDate} from '../utils/common.js';
+import {CATALOG_OFFERS} from './offers.js';
 // Вынес ICONS в константы, функции generatAvailableOffers и generatePoinTypeIcon вообще убрал, т.к. там внутри только обращение по ключу к объекту. Теперь это делаю прямо при генерации объекта.
 export const TRANSFER_POINTS = [
   `Taxi`,
@@ -40,18 +41,18 @@ const DESCRIPTION_OPTIONS = [
   `Nunc fermentum tortor ac porta dapibus.`,
   `In rutrum ac purus sit amet tempus.`
 ];
-export const CATALOG_OFFERS = {
-  [`Taxi`]: [[`Offer Taxi 1 `, 20], [`Offer Taxi 2 `, 20]],
-  [`Bus`]: null,
-  [`Train`]: [[`Offer Train 1 `, 50], [`Offer Train 2 `, 60]],
-  [`Ship`]: [[`Offer Ship 1 `, 40], [`Offer Ship 2 `, 50]],
-  [`Transport`]: null,
-  [`Drive`]: [[`Offer Drive 1 `, 150], [`Offer Drive 2 `, 160], [`Offer Drive 3 `, 170]],
-  [`Flight`]: [[`Add luggage `, 50], [`Add meal `, 15], [`Switch to comfort `, 100], [`Choose seats `, 5], [`Travel by train `, 40]],
-  [`Check-in`]: [[`Offer Check 1  `, 100], [`Offer Check 2  `, 110]],
-  [`Sightseeing`]: [[`Offer Sightseeing 1 `, 50], [`Offer Sightseeing 2 `, 60], [`Offer Sightseeing 3 `, 70]],
-  [`Restaurant`]: null
-};
+// export const CATALOG_OFFERS = {
+//   [`Taxi`]: [[`Offer Taxi 1 `, 20], [`Offer Taxi 2 `, 20]],
+//   [`Bus`]: null,
+//   [`Train`]: [[`Offer Train 1 `, 50], [`Offer Train 2 `, 60]],
+//   [`Ship`]: [[`Offer Ship 1 `, 40], [`Offer Ship 2 `, 50]],
+//   [`Transport`]: null,
+//   [`Drive`]: [[`Offer Drive 1 `, 150], [`Offer Drive 2 `, 160], [`Offer Drive 3 `, 170]],
+//   [`Flight`]: [[`Add luggage `, 50], [`Add meal `, 15], [`Switch to comfort `, 100], [`Choose seats `, 5], [`Travel by train `, 40]],
+//   [`Check-in`]: [[`Offer Check 1  `, 100], [`Offer Check 2  `, 110]],
+//   [`Sightseeing`]: [[`Offer Sightseeing 1 `, 50], [`Offer Sightseeing 2 `, 60], [`Offer Sightseeing 3 `, 70]],
+//   [`Restaurant`]: null
+// };
 const CITIES = [
   `Vienna`,
   `Minsk`,
@@ -119,10 +120,10 @@ const generateOffer = (pointType, Offers) => {
   if (!Offers[pointType]) {
     return null;
   }
-  // перемешиваем массив опций в рандомном порядке
-  const availableOffers = shuffleArray(Offers[pointType]);
+  // перемешиваем массив ключей опций в рандомном порядке
+  const availableOffers = shuffleArray(Object.keys(CATALOG_OFFERS[pointType]));
   // определяем сколько попадет опций из массива в выдачу
-  const quantityOffers = getRandomInteger(1, Offers[pointType].length);
+  const quantityOffers = getRandomInteger(1, Object.keys(CATALOG_OFFERS[pointType]).length);
 
   // возвращаем перемешанный и обрезанный(или необрезанный, как рандом пошлет) массив с опциями
   return availableOffers.slice(0, quantityOffers);
@@ -155,7 +156,7 @@ export const generateItemEvent = () => {
   const offer = generateOffer(pointType, CATALOG_OFFERS);
   const iconPoint = ICONS[pointType];
   const {timeStart, timeEnd} = generateTime(timeAccumulator);
-  const availableOffers = CATALOG_OFFERS[pointType];
+  // console.log(offer)
   return {
     id: generateId(),
     dataSort: dayDate(timeStart),
@@ -165,7 +166,6 @@ export const generateItemEvent = () => {
     timeStart,
     timeEnd,
     offer,
-    availableOffers,
     description: generateDescription(),
     photos: generatePhotos(),
     cost: generateCost(),
