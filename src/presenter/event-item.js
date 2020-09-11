@@ -26,6 +26,7 @@ export default class EventItem {
   }
 
   init(itemEvent, availableOffers) {
+    this._itemEvent = itemEvent;
     const prevEventItemComponent = this._itemEventComponent;
     const prevEventEditComponent = this._eventEditComponent;
 

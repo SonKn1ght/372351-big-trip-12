@@ -85,7 +85,7 @@ export default class Trip {
     // при изменениие Favorit => Minor перерисовка только карточки, Мajor при отправке формы
     switch (updateType) {
       case UpdateType.MINOR:
-        this._eventItemPresenter[data.id].init(data);
+        this._eventItemPresenter[data.id].init(data, this._availableOffersModel);
         break;
       case UpdateType.MAJOR:
         this._clearEventsElement();
