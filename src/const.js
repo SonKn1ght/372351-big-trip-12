@@ -13,7 +13,8 @@ export const UserAction = {
 export const UpdateType = {
   PATCH: `PATCH`,
   MINOR: `MINOR`,
-  MAJOR: `MAJOR`
+  MAJOR: `MAJOR`,
+  INIT: `INIT`
 };
 
 export const FilterType = {
@@ -21,3 +22,34 @@ export const FilterType = {
   FUTURE: `future`,
   PAST: `past`
 };
+
+// объект с данными по умолчанию - для запуска формы редактирования-создания в момент создания точки
+export const newItemEventDefault = {
+  pointType: `Taxi`,
+  iconPoint: `taxi.png`,
+  destination: `House`,
+  timeStart: new Date(),
+  timeEnd: new Date(),
+  description: ``,
+  availableOffers: [],
+  offer: [],
+  photos: [],
+  cost: ``,
+  isFavorite: false
+};
+
+export const TRANSFER_POINTS = [
+  `Taxi`,
+  `Bus`,
+  `Train`,
+  `Ship`,
+  `Transport`,
+  `Drive`,
+  `Flight`
+];
+export const ACTIVITY_POINTS = [
+  `Check-in`,
+  `Sightseeing`,
+  `Restaurant`
+];
+const POINTS_TYPE = TRANSFER_POINTS.concat(ACTIVITY_POINTS);

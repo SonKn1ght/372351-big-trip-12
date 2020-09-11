@@ -40,12 +40,19 @@ export const doFirstUpperCase = (str) => {
 };
 
 export const checkForElementArray = (array, element) => {
-  if (array.includes(element)) {
-    let result = array.filter((current) => {
-      return current !== element;
-    });
-    return result;
+  if (!Array.isArray(array)) {
+    array = [];
   }
-  array.push(element);
-  return array;
+  const verifiedArray = array.filter((current) => {
+    if (current.title === element.title && current.price === element.price) {
+      return false;
+    }
+    return true;
+  });
+  if (verifiedArray.length === array.length) {
+    array.push(element);
+    return array;
+  }
+  return verifiedArray;
 };
+

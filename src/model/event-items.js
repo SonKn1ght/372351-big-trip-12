@@ -1,4 +1,5 @@
 import Observer from '../utils/observer.js';
+import {dayDate, doFirstUpperCase} from '../utils/common.js';
 
 export default class EventItems extends Observer {
   constructor() {
@@ -6,8 +7,10 @@ export default class EventItems extends Observer {
     this._eventItems = [];
   }
 
-  setEventItems(eventItems) {
-    this._eventItems = eventItems.slice();
+  setEventItems(updateType, eventItems) {
+    this._eventItems = eventItems;
+
+    this._notify(updateType);
   }
 
   getEventItems() {
@@ -53,5 +56,48 @@ export default class EventItems extends Observer {
     ];
 
     this._notify(updateType);
+  }
+
+  static adaptToClient(eventItem) {
+    const adaptedEventItem = Object.assign(
+        {},
+        eventItem,
+        {
+          cost: eventItem.base_price,
+          dataSort: dayDate(new Date(eventItem.date_from)),
+          iconPoint: `${eventItem.type}.png`,
+          isFavorite: eventItem.is_favorite,
+          offer: eventItem.offers,
+          pointType: doFirstUpperCase(eventItem.type),
+          timeEnd: new Date(eventItem.date_to),
+          timeStart: new Date(eventItem.date_from)
+        });
+    delete adaptedEventItem.base_price;
+    delete adaptedEventItem.date_from;
+    delete adaptedEventItem.date_to;
+    delete adaptedEventItem.is_favorite;
+    delete adaptedEventItem.offers;
+    delete adaptedEventItem.type;
+    return adaptedEventItem;
+  }
+
+  static adaptToServer(eventItem) {
+    const adaptedEventItem = Object.assign(
+        {},
+        eventItem,
+        {
+          'base_price': eventItem.cost,
+          'is_favorite': eventItem.isFavorite,
+          'offers': eventItem.offer,
+          'type': (eventItem.pointType).toLowerCase(),
+          'date_from': eventItem.timeStart.toISOString(),
+          'date_to': eventItem.timeEnd.toISOString()
+        });
+    delete eventItem.dataSort;
+    delete eventItem.iconPoint;
+    delete eventItem.timeStart;
+    delete eventItem.timeEnd;
+
+    return adaptedEventItem;
   }
 }

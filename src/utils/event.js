@@ -1,4 +1,4 @@
-import {ACTIVITY_POINTS} from "../mock/item-event";
+import {ACTIVITY_POINTS} from '../const.js';
 import {addZero} from './common.js';
 import moment from 'moment';
 
@@ -33,4 +33,8 @@ export const formatEventDuration = (timeStart, timeEnd) => {
   }
 
   return `${addZero(duration.minutes())}M`;
+};
+
+export const generateId = () => {
+  return Date.now() + parseInt(Math.random() * 10000, 10);
 };

@@ -1,11 +1,12 @@
 import EventEditView from '../view/event-edit.js';
-import {generateId} from '../mock/item-event.js';
+import {generateId} from '../utils/event.js';
 import {remove, render, RenderPosition} from '../utils/render.js';
 import {UserAction, UpdateType} from '../const.js';
-import {newItemEventDefault} from '../mock/item-event.js';
+import {newItemEventDefault} from '../const.js';
 
 export default class EventItemNew {
   constructor(tripContainer, changeData, availableOffers) {
+    this._itemEvent = newItemEventDefault;
     this._tripContainer = tripContainer;
     this._changeData = changeData;
     this._availableOffers = availableOffers;
@@ -22,7 +23,7 @@ export default class EventItemNew {
       return;
     }
 
-    this._eventEditComponent = new EventEditView(this._availableOffers, newItemEventDefault, true);
+    this._eventEditComponent = new EventEditView(this._availableOffers, this._itemEvent, true);
     this._eventEditComponent.setFormSubmitHandler(this._handleFormSubmit);
     this._eventEditComponent.setEventDeleteHandler(this._handleDeleteClick);
 

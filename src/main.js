@@ -4,26 +4,26 @@ import FilterPresenter from './presenter/filter.js';
 import TripPresenter from './presenter/trip.js';
 import EventItemsModel from './model/event-items.js';
 import FilterModel from './model/filter.js';
-import {generateItemEvent} from './mock/item-event.js';
 import {render, RenderPosition} from './utils/render.js';
 import OffersModel from './model/offers.js';
-import {CATALOG_OFFERS} from './mock/offers.js';
+import {UpdateType} from './const.js';
+import Api from './api.js';
 
-const EVENTS_COUNT = 10;
 
-const itemsEvent = new Array(EVENTS_COUNT).fill().map(generateItemEvent);
+const AUTHORIZATION = `Basic hfcrwtnfkbz,kjyb`;
+const END_POINT = `https://12.ecmascript.pages.academy/big-trip/`;
+
+const api = new Api(END_POINT, AUTHORIZATION);
 
 const eventItemsModel = new EventItemsModel();
-eventItemsModel.setEventItems(itemsEvent);
 const availableOffersModel = new OffersModel();
-availableOffersModel.setAvailableOffers(CATALOG_OFFERS);
 
 const filterModel = new FilterModel();
 
 const mainElement = document.querySelector(`.trip-main`);
 const controlElement = mainElement.querySelector(`.trip-controls`);
-
-render(mainElement, new TripInfo(itemsEvent), RenderPosition.AFTERBEGIN);
+// прокинуть данные сюда после того как разберусь с остальным
+// render(mainElement, new TripInfo(itemsEvent), RenderPosition.AFTERBEGIN);
 
 const tabs = new Tabs();
 render(controlElement, tabs.getElementBeforeTitle(), RenderPosition.BEFOREEND);
@@ -41,5 +41,31 @@ document.querySelector(`.trip-main__event-add-btn`).addEventListener(`click`, (e
   evt.preventDefault();
   tripPresenter.createEventItems();
 });
+
+api.getOffers()
+  .then((offersAvailable) => {
+    availableOffersModel.setAvailableOffers(UpdateType.INIT, offersAvailable);
+  })
+  .catch(() => {
+    availableOffersModel.setAvailableOffers(UpdateType.INIT, []);
+  });
+
+api.getEventItems()
+  .then((eventItems) => {
+    eventItemsModel.setEventItems(UpdateType.INIT, eventItems);
+  })
+  .catch(() => {
+    console.warn(`catch`)
+    eventItemsModel.setEventItems(UpdateType.INIT, []);
+    console.warn(`catch2`)
+  });
+
+
+
+
+api.getDestinations().then((destinations) => {
+  // console.log(destinations);
+});
+
 
 

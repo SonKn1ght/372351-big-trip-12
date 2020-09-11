@@ -1,4 +1,4 @@
-import {newItemEventDefault, TRANSFER_POINTS, ACTIVITY_POINTS, ICONS} from '../mock/item-event.js';
+import {TRANSFER_POINTS, ACTIVITY_POINTS, newItemEventDefault} from '../const.js';
 import SmartView from './smart.js';
 import {addPreposition} from '../utils/event.js';
 import flatpickr from 'flatpickr';
@@ -9,9 +9,14 @@ export default class EventEdit extends SmartView {
 
   constructor(availableOffers, itemEvent = newItemEventDefault, newEvent = false) {
     super();
+
     this._data = itemEvent;
     this._newEvent = newEvent;
+
+
     this._availableOffers = availableOffers;
+
+
     this._dataPickerStart = null;
     this._dataPickerEnd = null;
 
@@ -25,6 +30,7 @@ export default class EventEdit extends SmartView {
     this._startTimeHandler = this._startTimeHandler.bind(this);
     this._endTimeHandler = this._endTimeHandler.bind(this);
     this._setDatapickers();
+
   }
 
   reset(itemEvent) {
@@ -32,8 +38,9 @@ export default class EventEdit extends SmartView {
   }
 
   _getTemplate() {
-    const {id, pointType, iconPoint, destination, timeStart, timeEnd, description, offer, photos, cost, isFavorite} = this._data;
-    const availableOffers = this._availableOffers.getAvailableOffers(pointType);
+    let {id, pointType, iconPoint, destination, timeStart, timeEnd, description, offer, photos, cost, isFavorite} = this._data;
+
+    let availableOffers = this._availableOffers.getAvailableOffers(pointType).offers;
 
     const formateDate = (date) => {
       // В британском английском используется порядок день-месяц-год
@@ -48,32 +55,42 @@ export default class EventEdit extends SmartView {
     };
 
     const renderOffers = (offers) => {
-      if (!availableOffers) {
+      if (availableOffers.length === 0) {
         return `No offers available`;
       }
       let result = ``;
+      // перезапись null на пустой массив иначе отваливается из-за попытки итерации по null
+      if (offer === null) {
+        offer = [];
+      }
       // проверка на наличие выбранных опций, если опции выбраны то вешаем атрибут на чекбокс
-      for (const offerItem in availableOffers) {
-        // эту проверку требует линтер, для цикла for in
-        if (Object.prototype.hasOwnProperty.call(availableOffers, offerItem)) {
-          let offerName = availableOffers[offerItem][0];
-          let offerPrice = availableOffers[offerItem][1];
-          let check = ``;
-          if (offers === null) {
-            check = ``;
-          } else if (offers.includes(offerItem)) {
-            check = `checked`;
-          }
 
-          result += `<div class="event__offer-selector">
-        <input class="event__offer-checkbox  visually-hidden" id="event-offer-${offerName}" type="checkbox" name="event-offer-luggage" ${check} data-nameOffer=${offerItem}>
-          <label class="event__offer-label" for="event-offer-${offerName}">
-            <span class="event__offer-title">${offerName}</span>
+      const offersTitle = offer.map((current) => {
+        return current.title;
+      });
+      const offersPrice = offer.map((current) => {
+        return current.price;
+      });
+
+      for (const offerItem of availableOffers) {
+        let offerTitle = offerItem.title;
+        let offerPrice = offerItem.price;
+        let check = ``;
+        if (offers === []) {
+          check = ``;
+        } else if (offersTitle.includes(offerTitle) && offersPrice.includes(offerPrice)) {
+          check = `checked`;
+        }
+
+        result += `<div class="event__offer-selector">
+        <input class="event__offer-checkbox  visually-hidden" id="event-offer-${offerTitle}" type="checkbox" name="event-offer-luggage" ${check} data-offer-title="${offerTitle}" data-offer-price="${offerPrice}">
+          <label class="event__offer-label" for="event-offer-${offerTitle}">
+            <span class="event__offer-title">${offerTitle}</span>
             &plus;
             &euro;&nbsp;<span class="event__offer-price">${offerPrice}</span>
           </label>
       </div>`;
-        }
+
       }
       return result;
     };
@@ -115,7 +132,7 @@ export default class EventEdit extends SmartView {
           <label class="event__label  event__type-output" for="event-destination-1">
             ${pointType} ${addPreposition(pointType)}
           </label>
-          <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${destination}" list="destination-list-1">
+          <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${destination.name}" list="destination-list-1">
           <datalist id="destination-list-1">
             <option value="Amsterdam"></option>
             <option value="Geneva"></option>
@@ -145,15 +162,17 @@ export default class EventEdit extends SmartView {
         </div>
 
         <button class="event__save-btn  btn  btn--blue" type="submit">Save</button>
-        <button class="event__reset-btn" type="reset">Delete</button>
+        <button class="event__reset-btn" type="reset">${this._newEvent ? `Cancel` : `Delete`}</button>
 
+        ${this._newEvent ? `` : `
         <input id="event-favorite-1" class="event__favorite-checkbox  visually-hidden" type="checkbox" name="event-favorite" ${isFavorite ? `checked` : ``}>
         <label class="event__favorite-btn" for="event-favorite-1">
           <span class="visually-hidden">Add to favorite</span>
           <svg class="event__favorite-icon" width="28" height="28" viewBox="0 0 28 28">
             <path d="M14 21l-8.22899 4.3262 1.57159-9.1631L.685209 9.67376 9.8855 8.33688 14 0l4.1145 8.33688 9.2003 1.33688-6.6574 6.48934 1.5716 9.1631L14 21z"/>
           </svg>
-        </label>
+        </label>`}
+
 
         <button class="event__rollup-btn" type="button">
           <span class="visually-hidden">Open event</span>
@@ -168,7 +187,7 @@ export default class EventEdit extends SmartView {
           </div>
         </section>
 
-        <section class="event__section  event__section--destination">
+        ${this._newEvent ? `<section class="event__section  event__section--destination">
           <h3 class="event__section-title  event__section-title--destination">Destination</h3>
           <p class="event__destination-description">${description}</p>
 
@@ -178,7 +197,7 @@ export default class EventEdit extends SmartView {
             </div>
           </div>
         </section>
-      </section>
+      </section>` : ``}
     </form>`;
 
     if (this._newEvent) {
@@ -230,8 +249,8 @@ export default class EventEdit extends SmartView {
     this.getElement()
       .querySelector(`.event__input--price`)
       .addEventListener(`input`, this._costInputHandler);
-    // проверяем вообще на наличие опций у точки.
-    if (this._availableOffers !== null) {
+    // проверяем вообще на наличие опций у точки если нет то нет смысла вызывать обработчик
+    if (this._availableOffers.getAvailableOffers(this._data.pointType).offers.length !== 0) {
       this.getElement()
         .querySelector(`.event__available-offers`)
         .addEventListener(`change`, this._offerSelectionHandler);
@@ -266,7 +285,7 @@ export default class EventEdit extends SmartView {
     this.updateData({
       pointType: evt.target.value,
       offer: null,
-      iconPoint: ICONS[evt.target.value]
+      iconPoint: `${evt.target.value.toLowerCase()}.png`
     });
   }
 
@@ -279,12 +298,13 @@ export default class EventEdit extends SmartView {
 
   _offerSelectionHandler(evt) {
     evt.preventDefault();
-    // если изначально опций не было запишем пустой массив вместо Null при выборе первой опции
-    if (this._data[`offer`] === null) {
-      this._data[`offer`] = [];
-    }
-    // проверяем на выбранность, если уже есть убираем, если нету - добавляем
-    const newOffers = checkForElementArray(this._data[`offer`], evt.target.dataset.nameoffer);
+
+    const evtOffer = {
+      title: evt.target.dataset.offerTitle,
+      // преобразование к числу т.к. с дата атрибута возвращает строку
+      price: +evt.target.dataset.offerPrice
+    };
+    const newOffers = checkForElementArray(this._data[`offer`], evtOffer);
     // вносим изменения
     this.updateData({
       offer: newOffers

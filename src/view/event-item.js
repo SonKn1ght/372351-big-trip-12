@@ -6,14 +6,13 @@ export default class EventItem extends AbstractView {
   constructor(itemEvent, availableOffers) {
     super();
     this._itemEvent = itemEvent;
+    // доступные теперь не нужны здесь не забыть потереть по все цепочке
     this._availableOffers = availableOffers;
     this._editClickHandler = this._editClickHandler.bind(this);
   }
 
   _getTemplate() {
     const {pointType, iconPoint, destination, timeStart, timeEnd, offer, cost} = this._itemEvent;
-    const availableOffers = this._availableOffers.getAvailableOffers(pointType);
-
     const createOffersTemplate = (offers) => {
       if (!offers) {
         return ``;
@@ -21,10 +20,10 @@ export default class EventItem extends AbstractView {
       let result = ``;
       // отображение только трех предложений в точке, остальные показываются при раскрытии точки
       const threeOffers = offers.slice(0, 3);
-
+      //
       for (const offerItem of threeOffers) {
-        let offerName = availableOffers[offerItem][0];
-        let offerPrice = availableOffers[offerItem][1];
+        let offerName = offerItem.title;
+        let offerPrice = offerItem.price;
         result += `<li class="event__offer">
         <span class="event__offer-title">${offerName}</span>
         &plus;
@@ -48,7 +47,7 @@ export default class EventItem extends AbstractView {
         <div class="event__type">
           <img class="event__type-icon" width="42" height="42" src="img/icons/${iconPoint}" alt="Event type icon">
         </div>
-        <h3 class="event__title">${pointType} ${addPreposition(pointType)} ${destination}</h3>
+        <h3 class="event__title">${pointType} ${addPreposition(pointType)} ${destination.name}</h3>
 
         <div class="event__schedule">
           <p class="event__time">

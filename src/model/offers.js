@@ -7,11 +7,17 @@ export default class Offers extends Observer {
     this._availableOffers = null;
   }
 
-  setAvailableOffers(offers) {
+  setAvailableOffers(updateType, offers) {
     this._availableOffers = offers;
+
+    this._notify(updateType);
   }
 
   getAvailableOffers(pointType) {
-    return this._availableOffers[pointType];
+    // отдаем набор опций под тип точки
+    // return this._availableOffers;
+    return this._availableOffers.filter((current) => {
+      return current.type === pointType.toLowerCase();
+    })[0];
   }
 }

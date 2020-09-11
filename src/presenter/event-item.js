@@ -26,6 +26,7 @@ export default class EventItem {
   }
 
   init(itemEvent, availableOffers) {
+    this._itemEvent = itemEvent;
     const prevEventItemComponent = this._itemEventComponent;
     const prevEventEditComponent = this._eventEditComponent;
 
@@ -36,7 +37,6 @@ export default class EventItem {
     this._eventEditComponent.setFormSubmitHandler(this._handleFormSubmit);
     this._eventEditComponent.setEventDeleteHandler(this._handleDeleteClick);
     this._eventEditComponent.setFavoriteClickHandler(this._handleFavoriteClick);
-
 
     if (prevEventItemComponent === null || prevEventEditComponent === null) {
       render(this._tripEventsList, this._itemEventComponent, RenderPosition.BEFOREEND);
@@ -113,7 +113,11 @@ export default class EventItem {
         UserAction.UPDATE_EVENT_ITEM,
         UpdateType.MINOR,
         Object.assign(
-            {}, this._itemEvent, {isFavorite: !this._itemEvent.isFavorite}
+            {},
+            this._itemEvent,
+            {
+              isFavorite: !this._itemEvent.isFavorite
+            }
         )
     );
   }
