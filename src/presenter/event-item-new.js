@@ -5,11 +5,12 @@ import {UserAction, UpdateType} from '../const.js';
 import {newItemEventDefault} from '../const.js';
 
 export default class EventItemNew {
-  constructor(tripContainer, changeData, availableOffers) {
+  constructor(tripContainer, changeData, availableOffers, availableDestinationsModel) {
     this._itemEvent = newItemEventDefault;
     this._tripContainer = tripContainer;
     this._changeData = changeData;
     this._availableOffers = availableOffers;
+    this._availableDestinations = availableDestinationsModel;
 
     this._eventEditComponent = null;
 
@@ -23,7 +24,7 @@ export default class EventItemNew {
       return;
     }
 
-    this._eventEditComponent = new EventEditView(this._availableOffers, this._itemEvent, true);
+    this._eventEditComponent = new EventEditView(this._availableOffers, this._itemEvent, this._availableDestinations, true);
     this._eventEditComponent.setFormSubmitHandler(this._handleFormSubmit);
     this._eventEditComponent.setEventDeleteHandler(this._handleDeleteClick);
 

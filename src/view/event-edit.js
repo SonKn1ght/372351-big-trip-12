@@ -7,14 +7,14 @@ import {dayDate, checkForElementArray} from '../utils/common.js';
 
 export default class EventEdit extends SmartView {
 
-  constructor(availableOffers, itemEvent = newItemEventDefault, newEvent = false) {
+  constructor(availableOffers, itemEvent = newItemEventDefault, availableDestinations, newEvent = false) {
     super();
-
     this._data = itemEvent;
     this._newEvent = newEvent;
 
 
     this._availableOffers = availableOffers;
+    this._availableDestinations = availableDestinations;
 
 
     this._dataPickerStart = null;
@@ -23,6 +23,7 @@ export default class EventEdit extends SmartView {
     this._formSubmitHandler = this._formSubmitHandler.bind(this);
     this._eventDeleteHandler = this._eventDeleteHandler.bind(this);
     this._eventSelectionHandler = this._eventSelectionHandler.bind(this);
+    this._eventSelectionDestinationHandler = this._eventSelectionDestinationHandler.bind(this);
     this._costInputHandler = this._costInputHandler.bind(this);
     this._offerSelectionHandler = this._offerSelectionHandler.bind(this);
     this._favoriteClickHandler = this._favoriteClickHandler.bind(this);
@@ -42,6 +43,8 @@ export default class EventEdit extends SmartView {
 
     let availableOffers = this._availableOffers.getAvailableOffers(pointType).offers;
 
+    const availableDestinations = this._availableDestinations;
+
     const formateDate = (date) => {
       // В британском английском используется порядок день-месяц-год
       let str = date.toLocaleString(`en-GB`, {day: `2-digit`, month: `2-digit`, year: `numeric`, hour12: false, hour: `2-digit`, minute: `2-digit`});
@@ -54,10 +57,21 @@ export default class EventEdit extends SmartView {
       }, ``);
     };
 
-    const renderOffers = (offers) => {
+    const renderOffersContainer = () => {
       if (availableOffers.length === 0) {
-        return `No offers available`;
+        return ``;
       }
+      return `<section class="event__section  event__section--offers">
+          <h3 class="event__section-title  event__section-title--offers">Offers</h3>
+
+          <div class="event__available-offers">
+            ${renderOffers(offer)}
+          </div>
+        </section>`;
+    };
+
+    const renderOffers = (offers) => {
+
       let result = ``;
       // перезапись null на пустой массив иначе отваливается из-за попытки итерации по null
       if (offer === null) {
@@ -105,6 +119,21 @@ export default class EventEdit extends SmartView {
         );
       }, ``);
     };
+    // версию с input пока оставлю пусть полежит
+    // const renderAvailableDestinations = (allDestinations) => {
+    //   return allDestinations.getAvailableDestinations()
+    //     .reduce((result, currentDestination) => {
+    //       return (result + `<option value="${currentDestination.name}"></option>`);
+    //     }, ``);
+    // };
+
+    const renderAvailableDestinations = (allDestinations) => {
+      return allDestinations.getAvailableDestinations()
+        .reduce((result, currentDestination) => {
+          const isSelected = currentDestination.name === destination.name ? `selected` : ``;
+          return (result + `<option ${isSelected} value='${currentDestination.name}'>${currentDestination.name}</option>`);
+        }, ``);
+    };
 
     const bodyTemplate = `<form class="trip-events__item  event  event--edit" action="#" method="post">
       <header class="event__header">
@@ -132,13 +161,16 @@ export default class EventEdit extends SmartView {
           <label class="event__label  event__type-output" for="event-destination-1">
             ${pointType} ${addPreposition(pointType)}
           </label>
+
+          <!-- версию с input пока оставлю пусть полежит
           <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${destination.name}" list="destination-list-1">
           <datalist id="destination-list-1">
-            <option value="Amsterdam"></option>
-            <option value="Geneva"></option>
-            <option value="Chamonix"></option>
-            <option value="Saint Petersburg"></option>
-          </datalist>
+          ${renderAvailableDestinations(availableDestinations)}
+          </datalist>-->
+
+          <select class="event__input  event__input--destination" name="select">
+            ${renderAvailableDestinations(availableDestinations)}
+          </select>
         </div>
 
         <div class="event__field-group  event__field-group--time">
@@ -178,14 +210,9 @@ export default class EventEdit extends SmartView {
           <span class="visually-hidden">Open event</span>
         </button>
       </header>
-      <section class="event__details">
-        <section class="event__section  event__section--offers">
-          <h3 class="event__section-title  event__section-title--offers">Offers</h3>
 
-          <div class="event__available-offers">
-      ${renderOffers(offer)}
-          </div>
-        </section>
+      <section class="event__details">
+      ${renderOffersContainer()}
 
         ${this._newEvent ? `<section class="event__section  event__section--destination">
           <h3 class="event__section-title  event__section-title--destination">Destination</h3>
@@ -247,6 +274,9 @@ export default class EventEdit extends SmartView {
       .querySelector(`.event__type-list`)
       .addEventListener(`change`, this._eventSelectionHandler);
     this.getElement()
+      .querySelector(`.event__input--destination`)
+      .addEventListener(`change`, this._eventSelectionDestinationHandler);
+    this.getElement()
       .querySelector(`.event__input--price`)
       .addEventListener(`input`, this._costInputHandler);
     // проверяем вообще на наличие опций у точки если нет то нет смысла вызывать обработчик
@@ -286,6 +316,16 @@ export default class EventEdit extends SmartView {
       pointType: evt.target.value,
       offer: null,
       iconPoint: `${evt.target.value.toLowerCase()}.png`
+    });
+  }
+
+  _eventSelectionDestinationHandler(evt) {
+    evt.preventDefault();
+    this.updateData({
+      destination: this._availableDestinations.getAvailableDestinations().filter((current) => {
+        return current.name === evt.target.value;
+      })[0]
+      // 0 тут что бы достать объект из массива
     });
   }
 

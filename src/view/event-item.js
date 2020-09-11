@@ -3,11 +3,9 @@ import {addPreposition} from '../utils/event.js';
 import {formatEventDuration} from '../utils/event.js';
 
 export default class EventItem extends AbstractView {
-  constructor(itemEvent, availableOffers) {
+  constructor(itemEvent) {
     super();
     this._itemEvent = itemEvent;
-    // доступные теперь не нужны здесь не забыть потереть по все цепочке
-    this._availableOffers = availableOffers;
     this._editClickHandler = this._editClickHandler.bind(this);
   }
 

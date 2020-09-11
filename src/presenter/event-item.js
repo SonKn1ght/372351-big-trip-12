@@ -25,13 +25,13 @@ export default class EventItem {
     this._handleFavoriteClick = this._handleFavoriteClick.bind(this);
   }
 
-  init(itemEvent, availableOffers) {
+  init(itemEvent, availableOffers, availableDestinations) {
     this._itemEvent = itemEvent;
     const prevEventItemComponent = this._itemEventComponent;
     const prevEventEditComponent = this._eventEditComponent;
 
-    this._itemEventComponent = new EventItemView(itemEvent, availableOffers);
-    this._eventEditComponent = new EventEditView(availableOffers, itemEvent);
+    this._itemEventComponent = new EventItemView(itemEvent);
+    this._eventEditComponent = new EventEditView(availableOffers, itemEvent, availableDestinations);
 
     this._itemEventComponent.setEditClickHandler(this._handleEditClick);
     this._eventEditComponent.setFormSubmitHandler(this._handleFormSubmit);

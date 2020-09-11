@@ -6,6 +6,7 @@ import EventItemsModel from './model/event-items.js';
 import FilterModel from './model/filter.js';
 import {render, RenderPosition} from './utils/render.js';
 import OffersModel from './model/offers.js';
+import DestinationsModel from './model/destinations.js';
 import {UpdateType} from './const.js';
 import Api from './api.js';
 
@@ -17,6 +18,7 @@ const api = new Api(END_POINT, AUTHORIZATION);
 
 const eventItemsModel = new EventItemsModel();
 const availableOffersModel = new OffersModel();
+const availableDestinationsModel = new DestinationsModel();
 
 const filterModel = new FilterModel();
 
@@ -34,7 +36,7 @@ filterPresenter.init();
 
 const eventsElement = document.querySelector(`.trip-events`);
 
-const tripPresenter = new TripPresenter(eventsElement, eventItemsModel, filterModel, availableOffersModel);
+const tripPresenter = new TripPresenter(eventsElement, eventItemsModel, filterModel, availableOffersModel, availableDestinationsModel);
 tripPresenter.init();
 
 document.querySelector(`.trip-main__event-add-btn`).addEventListener(`click`, (evt) => {
@@ -50,22 +52,22 @@ api.getOffers()
     availableOffersModel.setAvailableOffers(UpdateType.INIT, []);
   });
 
+api.getDestinations()
+  .then((destinations) => {
+    availableDestinationsModel.setAvailableDestinations(UpdateType.INIT, destinations);
+  })
+  .catch(
+      availableDestinationsModel.setAvailableDestinations(UpdateType.INIT, [])
+  );
+
 api.getEventItems()
   .then((eventItems) => {
     eventItemsModel.setEventItems(UpdateType.INIT, eventItems);
   })
   .catch(() => {
-    console.warn(`catch`)
+    // console.warn(`catch`)
     eventItemsModel.setEventItems(UpdateType.INIT, []);
-    console.warn(`catch2`)
+    // console.warn(`catch2`)
   });
-
-
-
-
-api.getDestinations().then((destinations) => {
-  // console.log(destinations);
-});
-
 
 

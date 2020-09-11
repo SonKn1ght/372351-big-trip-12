@@ -12,10 +12,11 @@ import {filter} from '../utils/filter.js';
 
 
 export default class Trip {
-  constructor(tripContainer, eventItemsModel, filterModel, availableOffersModel) {
+  constructor(tripContainer, eventItemsModel, filterModel, availableOffersModel, availableDestinationsModel) {
     this._eventItemsModel = eventItemsModel;
     this._filterModel = filterModel;
     this._availableOffersModel = availableOffersModel;
+    this._availableDestinationsModel = availableDestinationsModel;
     this._tripContainer = tripContainer;
     this._currentSortType = SortType.DEFAULT;
 
@@ -35,7 +36,7 @@ export default class Trip {
     this._eventItemsModel.addObserver(this._handleModelEvent);
     this._filterModel.addObserver(this._handleModelEvent);
 
-    this._eventItemNewPresenter = new EventItemNewPresenter(this._tripContainer, this._handleViewAction, this._availableOffersModel);
+    this._eventItemNewPresenter = new EventItemNewPresenter(this._tripContainer, this._handleViewAction, this._availableOffersModel, this._availableDestinationsModel);
   }
 
   init() {
@@ -88,7 +89,7 @@ export default class Trip {
     // при изменениие Favorit => Minor перерисовка только карточки, Мajor при отправке формы
     switch (updateType) {
       case UpdateType.MINOR:
-        this._eventItemPresenter[data.id].init(data, this._availableOffersModel);
+        this._eventItemPresenter[data.id].init(data, this._availableOffersModel, this._availableDestinationsModel);
         break;
       case UpdateType.MAJOR:
         this._clearEventsElement();
@@ -138,16 +139,14 @@ export default class Trip {
     render(this._tripContainer, this._tripDaysComponent, RenderPosition.BEFOREEND);
   }
 
-  _renderEventItem(eventListElement, itemEvent, availableOffers) {
+  _renderEventItem(eventListElement, itemEvent, availableOffers, availableDestinations) {
     const eventItemPresenter = new EventItemPresenter(eventListElement, this._handleViewAction, this._handleModeChange);
-    // console.log(1)
-    eventItemPresenter.init(itemEvent, availableOffers);
+    eventItemPresenter.init(itemEvent, availableOffers, availableDestinations);
     // сохраняем ссылки на точки в отдельное свойство
     this._eventItemPresenter[itemEvent.id] = eventItemPresenter;
   }
 
   _renderEventList(itemsEvent) {
-    console.log(itemsEvent)
     let uniqueTripDays;
     let count;
 
@@ -184,7 +183,7 @@ export default class Trip {
       }
       // рисуем точки по итоговым данным
       currentDayItemsEvent.forEach((point) => {
-        this._renderEventItem(tripEventsList, point, this._availableOffersModel);
+        this._renderEventItem(tripEventsList, point, this._availableOffersModel, this._availableDestinationsModel);
       });
     });
   }
