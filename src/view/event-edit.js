@@ -1,18 +1,25 @@
-import {newItemEventDefault, TRANSFER_POINTS, ACTIVITY_POINTS, CATALOG_OFFERS, ICONS} from '../mock/item-event.js';
+import {newItemEventDefault, TRANSFER_POINTS, ACTIVITY_POINTS, ICONS} from '../mock/item-event.js';
 import SmartView from './smart.js';
 import {addPreposition} from '../utils/event.js';
 import flatpickr from 'flatpickr';
 import '../../node_modules/flatpickr/dist/flatpickr.min.css';
+import {dayDate, checkForElementArray} from '../utils/common.js';
 
 export default class EventEdit extends SmartView {
-  constructor(itemEvent = newItemEventDefault) {
+
+  constructor(availableOffers, itemEvent = newItemEventDefault, newEvent = false) {
     super();
     this._data = itemEvent;
+    this._newEvent = newEvent;
+    this._availableOffers = availableOffers;
     this._dataPickerStart = null;
     this._dataPickerEnd = null;
 
     this._formSubmitHandler = this._formSubmitHandler.bind(this);
+    this._eventDeleteHandler = this._eventDeleteHandler.bind(this);
     this._eventSelectionHandler = this._eventSelectionHandler.bind(this);
+    this._costInputHandler = this._costInputHandler.bind(this);
+    this._offerSelectionHandler = this._offerSelectionHandler.bind(this);
     this._favoriteClickHandler = this._favoriteClickHandler.bind(this);
     this._setInnerHandlers();
     this._startTimeHandler = this._startTimeHandler.bind(this);
@@ -25,7 +32,8 @@ export default class EventEdit extends SmartView {
   }
 
   _getTemplate() {
-    const {id, pointType, iconPoint, destination, timeStart, timeEnd, description, availableOffers, offer, photos, cost, isFavorite} = this._data;
+    const {id, pointType, iconPoint, destination, timeStart, timeEnd, description, offer, photos, cost, isFavorite} = this._data;
+    const availableOffers = this._availableOffers.getAvailableOffers(pointType);
 
     const formateDate = (date) => {
       // В британском английском используется порядок день-месяц-год
@@ -40,26 +48,32 @@ export default class EventEdit extends SmartView {
     };
 
     const renderOffers = (offers) => {
-      if (!offers) {
+      if (!availableOffers) {
         return `No offers available`;
       }
       let result = ``;
       // проверка на наличие выбранных опций, если опции выбраны то вешаем атрибут на чекбокс
-      for (const offerItem of offers) {
-        let check = ``;
-        if (offer === null) {
-          check = ``;
-        } else if (offer.includes(offerItem)) {
-          check = `checked`;
-        }
-        result += `<div class="event__offer-selector">
-        <input class="event__offer-checkbox  visually-hidden" id="event-offer-${offerItem[0]}" type="checkbox" name="event-offer-luggage" ${check}>
-          <label class="event__offer-label" for="event-offer-${offerItem[0]}">
-            <span class="event__offer-title">${offerItem[0]}</span>
+      for (const offerItem in availableOffers) {
+        // эту проверку требует линтер, для цикла for in
+        if (Object.prototype.hasOwnProperty.call(availableOffers, offerItem)) {
+          let offerName = availableOffers[offerItem][0];
+          let offerPrice = availableOffers[offerItem][1];
+          let check = ``;
+          if (offers === null) {
+            check = ``;
+          } else if (offers.includes(offerItem)) {
+            check = `checked`;
+          }
+
+          result += `<div class="event__offer-selector">
+        <input class="event__offer-checkbox  visually-hidden" id="event-offer-${offerName}" type="checkbox" name="event-offer-luggage" ${check} data-nameOffer=${offerItem}>
+          <label class="event__offer-label" for="event-offer-${offerName}">
+            <span class="event__offer-title">${offerName}</span>
             &plus;
-            &euro;&nbsp;<span class="event__offer-price">${offerItem[1]}</span>
+            &euro;&nbsp;<span class="event__offer-price">${offerPrice}</span>
           </label>
       </div>`;
+        }
       }
       return result;
     };
@@ -75,9 +89,7 @@ export default class EventEdit extends SmartView {
       }, ``);
     };
 
-    return (
-      `<li class="trip-events__item">
-         <form class="trip-events__item  event  event--edit" action="#" method="post">
+    const bodyTemplate = `<form class="trip-events__item  event  event--edit" action="#" method="post">
       <header class="event__header">
         <div class="event__type-wrapper">
           <label class="event__type  event__type-btn" for="event-type-toggle-1">
@@ -129,19 +141,20 @@ export default class EventEdit extends SmartView {
             <span class="visually-hidden">Price</span>
             &euro;
           </label>
-          <input class="event__input  event__input--price" id="event-price-1" type="text" name="event-price" value="${cost}">
+          <input class="event__input  event__input--price" id="event-price-1" type="number" name="event-price" value="${cost}">
         </div>
 
         <button class="event__save-btn  btn  btn--blue" type="submit">Save</button>
-        <button class="event__reset-btn" type="reset">Delete</button>
+        <button class="event__reset-btn" type="reset">${this._newEvent ? `Cancel` : `Delete`}</button>
 
+        ${this._newEvent ? `` : `
         <input id="event-favorite-1" class="event__favorite-checkbox  visually-hidden" type="checkbox" name="event-favorite" ${isFavorite ? `checked` : ``}>
         <label class="event__favorite-btn" for="event-favorite-1">
           <span class="visually-hidden">Add to favorite</span>
           <svg class="event__favorite-icon" width="28" height="28" viewBox="0 0 28 28">
             <path d="M14 21l-8.22899 4.3262 1.57159-9.1631L.685209 9.67376 9.8855 8.33688 14 0l4.1145 8.33688 9.2003 1.33688-6.6574 6.48934 1.5716 9.1631L14 21z"/>
           </svg>
-        </label>
+        </label>`}
 
         <button class="event__rollup-btn" type="button">
           <span class="visually-hidden">Open event</span>
@@ -152,7 +165,7 @@ export default class EventEdit extends SmartView {
           <h3 class="event__section-title  event__section-title--offers">Offers</h3>
 
           <div class="event__available-offers">
-      ${renderOffers(availableOffers)}
+      ${renderOffers(offer)}
           </div>
         </section>
 
@@ -167,14 +180,21 @@ export default class EventEdit extends SmartView {
           </div>
         </section>
       </section>
-    </form>
-</li>`
-    );
+    </form>`;
+
+    if (this._newEvent) {
+      return bodyTemplate;
+    }
+
+    return `<li class="trip-events__item">
+       ${bodyTemplate}
+       </li>`;
   }
 
   restoreHandlers() {
     this._setInnerHandlers();
     this.setFormSubmitHandler(this._callback.formSubmit);
+    this.setEventDeleteHandler(this._callback.eventDelete);
     this.setFavoriteClickHandler(this._callback.favoriteClick);
     this._setDatapickers();
   }
@@ -208,6 +228,15 @@ export default class EventEdit extends SmartView {
     this.getElement()
       .querySelector(`.event__type-list`)
       .addEventListener(`change`, this._eventSelectionHandler);
+    this.getElement()
+      .querySelector(`.event__input--price`)
+      .addEventListener(`input`, this._costInputHandler);
+    // проверяем вообще на наличие опций у точки.
+    if (this._availableOffers !== null) {
+      this.getElement()
+        .querySelector(`.event__available-offers`)
+        .addEventListener(`change`, this._offerSelectionHandler);
+    }
   }
 
   _startTimeHandler([userDate]) {
@@ -215,11 +244,13 @@ export default class EventEdit extends SmartView {
     if (userDate > this._data.timeEnd) {
       this.updateData({
         timeStart: userDate,
+        dataSort: dayDate(userDate),
         timeEnd: userDate
       });
     } else {
       this.updateData({
-        timeStart: userDate
+        timeStart: userDate,
+        dataSort: dayDate(userDate)
       });
     }
 
@@ -235,14 +266,40 @@ export default class EventEdit extends SmartView {
     evt.preventDefault();
     this.updateData({
       pointType: evt.target.value,
-      availableOffers: CATALOG_OFFERS[evt.target.value],
+      offer: null,
       iconPoint: ICONS[evt.target.value]
     });
+  }
+
+  _costInputHandler(evt) {
+    evt.preventDefault();
+    this.updateData({
+      cost: evt.target.value
+    }, true);
+  }
+
+  _offerSelectionHandler(evt) {
+    evt.preventDefault();
+    // если изначально опций не было запишем пустой массив вместо Null при выборе первой опции
+    if (this._data[`offer`] === null) {
+      this._data[`offer`] = [];
+    }
+    // проверяем на выбранность, если уже есть убираем, если нету - добавляем
+    const newOffers = checkForElementArray(this._data[`offer`], evt.target.dataset.nameoffer);
+    // вносим изменения
+    this.updateData({
+      offer: newOffers
+    }, true);
   }
 
   _formSubmitHandler(evt) {
     evt.preventDefault();
     this._callback.formSubmit(this._data);
+  }
+
+  _eventDeleteHandler(evt) {
+    evt.preventDefault();
+    this._callback.eventDelete(this._data);
   }
 
   _favoriteClickHandler(evt) {
@@ -252,7 +309,12 @@ export default class EventEdit extends SmartView {
 
   setFormSubmitHandler(callback) {
     this._callback.formSubmit = callback;
-    this.getElement().querySelector(`form`).addEventListener(`submit`, this._formSubmitHandler);
+    this.getElement().addEventListener(`submit`, this._formSubmitHandler);
+  }
+
+  setEventDeleteHandler(callback) {
+    this._callback.eventDelete = callback;
+    this.getElement().querySelector(`.event__reset-btn`).addEventListener(`click`, this._eventDeleteHandler);
   }
 
   setFavoriteClickHandler(callback) {

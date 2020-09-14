@@ -3,59 +3,94 @@ import NoEvent from '../view/no-event.js';
 import SortEvent from '../view/sort-event.js';
 import TripDays from '../view/trip-day.js';
 import EventItemPresenter from './event-item.js';
-import {updateItem} from '../utils/common.js';
+import EventItemNewPresenter from './event-item-new.js';
 import {remove, render, RenderPosition} from '../utils/render.js';
-import {SortType} from '../const.js';
-import {sortEventDuration, sortEventPrice} from '../utils/event.js';
+import {FilterType, SortType, UpdateType, UserAction} from '../const.js';
+import {sortEventDuration, sortEventPrice, sortDefault} from '../utils/event.js';
+import {filter} from '../utils/filter.js';
 
 
 export default class Trip {
-  constructor(tripContainer) {
+  constructor(tripContainer, eventItemsModel, filterModel, availableOffersModel) {
+    this._eventItemsModel = eventItemsModel;
+    this._filterModel = filterModel;
+    this._availableOffersModel = availableOffersModel;
     this._tripContainer = tripContainer;
     this._currentSortType = SortType.DEFAULT;
 
     this._eventItemPresenter = {};
-    this._eventListElements = {};
 
-    this._noEvent = new NoEvent();
-    this._sortEvent = new SortEvent();
-    this._tripDays = new TripDays();
-    this._handleEventItemChange = this._handleEventItemChange.bind(this);
+    this._sortEventComponent = null;
+    this._tripDaysComponent = null;
+    this._noEventComponent = new NoEvent();
+
+    this._handleViewAction = this._handleViewAction.bind(this);
+    this._handleModelEvent = this._handleModelEvent.bind(this);
     this._handleSortTypeChange = this._handleSortTypeChange.bind(this);
     this._handleModeChange = this._handleModeChange.bind(this);
+
+    this._eventItemsModel.addObserver(this._handleModelEvent);
+    this._filterModel.addObserver(this._handleModelEvent);
+
+    this._eventItemNewPresenter = new EventItemNewPresenter(this._tripContainer, this._handleViewAction, this._availableOffersModel);
   }
 
-  init(itemsEvent) {
+  init() {
+    // странновато, если не будет сюда добавок убрать лишний метод
+    this._renderEventsElement();
+  }
 
-    if (itemsEvent.length === 0) {
-      this._renderNoEvent();
-      return;
+  createEventItems() {
+    this._currentSortType = SortType.DEFAULT;
+    this._filterModel.setFilter(UpdateType.MAJOR, FilterType.EVERYTHING);
+    this._eventItemNewPresenter.init();
+  }
+
+  _getEventItems() {
+    const filterType = this._filterModel.getFilter();
+    const eventItems = this._eventItemsModel.getEventItems();
+    const filteredEventItems = filter[filterType](eventItems);
+    switch (this._currentSortType) {
+      case SortType.DURATION:
+        return filteredEventItems.sort(sortEventDuration);
+      case SortType.PRICE:
+        return filteredEventItems.sort(sortEventPrice);
     }
-    this._itemsEvent = itemsEvent;
-    this._renderSortEvent();
-    this._renderTripDays();
-    this._renderEventList();
+    // добавил сортировку по дефолту, в хронологическом порядке старта события.
+    return filteredEventItems.sort(sortDefault);
   }
 
   _handleModeChange() {
+    this._eventItemNewPresenter.destroy();
     Object
       .values(this._eventItemPresenter)
       .forEach((presenter) => presenter.resetView());
   }
 
-  _handleEventItemChange(updatedEventItem) {
-    this._itemsEvent = updateItem(this._itemsEvent, updatedEventItem);
-    this._eventItemPresenter[updatedEventItem.id].init(updatedEventItem);
+  _handleViewAction(actionType, updateType, update) {
+    switch (actionType) {
+      case UserAction.UPDATE_EVENT_ITEM:
+        this._eventItemsModel.updateEventItem(updateType, update);
+        break;
+      case UserAction.ADD_EVENT_ITEM:
+        this._eventItemsModel.addEventItem(updateType, update);
+        break;
+      case UserAction.DELETE_EVENT_ITEM:
+        this._eventItemsModel.deleteEventItem(updateType, update);
+        break;
+    }
   }
 
-  _sortTasks(sortType) {
-    const dataToSort = this._itemsEvent.slice();
-    switch (sortType) {
-      case SortType.DURATION:
-        return dataToSort.sort(sortEventDuration);
-      case SortType.PRICE:
-        return dataToSort.sort(sortEventPrice);
-      default: return dataToSort;
+  _handleModelEvent(updateType, data) {
+    // при изменениие Favorit => Minor перерисовка только карточки, Мajor при отправке формы
+    switch (updateType) {
+      case UpdateType.MINOR:
+        this._eventItemPresenter[data.id].init(data, this._availableOffersModel);
+        break;
+      case UpdateType.MAJOR:
+        this._clearEventsElement();
+        this._renderEventsElement();
+        break;
     }
   }
 
@@ -63,58 +98,46 @@ export default class Trip {
     if (this._currentSortType === sortType) {
       return;
     }
-    // убрал запись в текущий тип сюда, что б не было ничего лишнего в самой сортировке, т.е. использовать ее как раз как функцию
     this._currentSortType = sortType;
-    this._clearTripDays();
-    const sortedItemsEvent = this._sortTasks(sortType);
-    this._renderEventList(sortedItemsEvent, this._currentSortType);
+    this._clearEventsElement();
+    this._renderEventsElement();
   }
 
   _renderNoEvent() {
-    render(this._tripContainer, this._noEvent, RenderPosition.BEFOREEND);
+    render(this._tripContainer, this._noEventComponent, RenderPosition.BEFOREEND);
   }
 
   _renderSortEvent() {
-    render(this._tripContainer, this._sortEvent, RenderPosition.BEFOREEND);
-    this._sortEvent.getElement().addEventListener(`change`, (evt) => {
-      this._handleSortTypeChange(evt.target.dataset.sortType);
-    });
+    if (this._sortEventComponent !== null) {
+      this._sortEventComponent = null;
+    }
+    this._sortEventComponent = new SortEvent(this._currentSortType);
+    this._sortEventComponent.setSortTypeChangeHandler(this._handleSortTypeChange);
+
+    render(this._tripContainer, this._sortEventComponent, RenderPosition.BEFOREEND);
   }
 
   _renderTripDays() {
-    render(this._tripContainer, this._tripDays, RenderPosition.BEFOREEND);
+    if (this._tripDaysComponent !== null) {
+      this._tripDaysComponent = null;
+    }
+    this._tripDaysComponent = new TripDays();
+
+    render(this._tripContainer, this._tripDaysComponent, RenderPosition.BEFOREEND);
   }
 
-  _clearTripDays() {
-    Object
-      .values(this._eventItemPresenter)
-      .forEach((presenter) => {
-        presenter.destroy();
-      });
-    this._eventItemPresenter = {};
-
-    // отдельно удаляю дни, были мысли им свой презентер сделать, но они для этого слишком просты и не имеют своего интерактива
-    Object
-      .values(this._eventListElements)
-      .forEach((element) => {
-        remove(element);
-      });
-    this._eventListElements = {};
-  }
-
-  _renderEventItem(eventListElement, itemEvent) {
-    const eventItemPresenter = new EventItemPresenter(eventListElement, this._handleEventItemChange, this._handleModeChange);
-    eventItemPresenter.init(itemEvent);
+  _renderEventItem(eventListElement, itemEvent, availableOffers) {
+    const eventItemPresenter = new EventItemPresenter(eventListElement, this._handleViewAction, this._handleModeChange);
+    eventItemPresenter.init(itemEvent, availableOffers);
     // сохраняем ссылки на точки в отдельное свойство
     this._eventItemPresenter[itemEvent.id] = eventItemPresenter;
   }
 
-  _renderEventList(itemsEvent = this._itemsEvent, sort = SortType.DEFAULT) {
-    // в очередной раз переписал эту функцию через set и фильтрацию
+  _renderEventList(itemsEvent) {
     let uniqueTripDays;
     let count;
 
-    if (sort === SortType.DEFAULT) {
+    if (this._currentSortType === SortType.DEFAULT) {
       let days = [];
       for (const item of itemsEvent) {
         days.push(item.dataSort);
@@ -130,16 +153,14 @@ export default class Trip {
       // создаем день
       const eventListElement = new DayItem(count, currentDay);
       count++;
-      // сохраняем ссылку на него для удаления
-      this._eventListElements[currentDay] = eventListElement;
 
       // рисуем день
-      render(this._tripDays, eventListElement, RenderPosition.BEFOREEND);
+      render(this._tripDaysComponent, eventListElement, RenderPosition.BEFOREEND);
       // находим в дне элемент в который пишем точки
       const tripEventsList = eventListElement.getElement().querySelector(`.trip-events__list`);
       // пишем в переменную точки
       let currentDayItemsEvent = itemsEvent;
-      if (sort === SortType.DEFAULT) {
+      if (this._currentSortType === SortType.DEFAULT) {
         // получем точки только для этого дня если рисовка по умолчанию
         currentDayItemsEvent = itemsEvent
           .slice()
@@ -149,8 +170,34 @@ export default class Trip {
       }
       // рисуем точки по итоговым данным
       currentDayItemsEvent.forEach((point) => {
-        this._renderEventItem(tripEventsList, point);
+        this._renderEventItem(tripEventsList, point, this._availableOffersModel);
       });
     });
+  }
+
+  _clearEventsElement() {
+    this._eventItemNewPresenter.destroy();
+    Object
+      .values(this._eventItemPresenter)
+      .forEach((presenter) => {
+        presenter.destroy();
+      });
+    this._eventItemPresenter = {};
+
+    remove(this._sortEventComponent);
+    remove(this._noEventComponent);
+    remove(this._tripDaysComponent);
+  }
+
+  _renderEventsElement() {
+    const eventItems = this._getEventItems();
+    if (eventItems.length === 0) {
+      this._renderNoEvent();
+      return;
+    }
+
+    this._renderSortEvent();
+    this._renderTripDays();
+    this._renderEventList(eventItems);
   }
 }

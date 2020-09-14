@@ -21,20 +21,6 @@ export const dayDate = (Date) => {
   return Date.toLocaleString(`en-US`, {month: `short`, day: `numeric`});
 };
 
-export const updateItem = (items, update) => {
-  const index = items.findIndex((item) => item.id === update.id);
-
-  if (index === -1) {
-    return items;
-  }
-
-  return [
-    ...items.slice(0, index),
-    update,
-    ...items.slice(index + 1)
-  ];
-};
-
 // добавляем ноль спереди если его нет
 export const addZero = (number) => {
   let numberCurrent = String(number);
@@ -44,4 +30,22 @@ export const addZero = (number) => {
   }
   numberCurrent = `0${number}`;
   return numberCurrent;
+};
+
+export const doFirstUpperCase = (str) => {
+  if (typeof str !== `string`) {
+    throw new Error(`Not string`);
+  }
+  return str[0].toUpperCase() + str.slice(1).toLowerCase();
+};
+
+export const checkForElementArray = (array, element) => {
+  if (array.includes(element)) {
+    let result = array.filter((current) => {
+      return current !== element;
+    });
+    return result;
+  }
+  array.push(element);
+  return array;
 };

@@ -1,4 +1,6 @@
 import AbstractView from './abstract.js';
+// сюда офферы пока передаются напрямую из моков, будет переделано
+import {CATALOG_OFFERS} from '../mock/offers.js';
 
 
 export default class TripInfo extends AbstractView {
@@ -31,12 +33,15 @@ export default class TripInfo extends AbstractView {
     }
     // считаем стоимость
     const allCost = this._itemsEvent.reduce((accumulator, currentValue) => {
+      // тут подпорки будет переделано
+      const pointType = currentValue[`pointType`];
+
       let costStepOffeer = 0;
       if (currentValue.offer === null) {
         costStepOffeer = 0;
       } else {
         for (let el of currentValue.offer) {
-          costStepOffeer += el[1];
+          costStepOffeer += CATALOG_OFFERS[pointType][el][1];
         }
       }
       return accumulator + currentValue.cost + costStepOffeer;

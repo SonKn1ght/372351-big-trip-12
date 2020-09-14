@@ -4,6 +4,7 @@ export default class Smart extends AbstractView {
   constructor() {
     super();
     this._data = {};
+    this._availableOffers = {};
   }
 
   updateData(update, justDataUpdating) {

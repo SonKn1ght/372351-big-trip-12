@@ -3,14 +3,17 @@ import {addPreposition} from '../utils/event.js';
 import {formatEventDuration} from '../utils/event.js';
 
 export default class EventItem extends AbstractView {
-  constructor(itemEvent) {
+  constructor(itemEvent, availableOffers) {
     super();
     this._itemEvent = itemEvent;
+    this._availableOffers = availableOffers;
     this._editClickHandler = this._editClickHandler.bind(this);
   }
 
   _getTemplate() {
     const {pointType, iconPoint, destination, timeStart, timeEnd, offer, cost} = this._itemEvent;
+    const availableOffers = this._availableOffers.getAvailableOffers(pointType);
+
     const createOffersTemplate = (offers) => {
       if (!offers) {
         return ``;
@@ -18,11 +21,14 @@ export default class EventItem extends AbstractView {
       let result = ``;
       // отображение только трех предложений в точке, остальные показываются при раскрытии точки
       const threeOffers = offers.slice(0, 3);
-      for (const off of threeOffers) {
+
+      for (const offerItem of threeOffers) {
+        let offerName = availableOffers[offerItem][0];
+        let offerPrice = availableOffers[offerItem][1];
         result += `<li class="event__offer">
-        <span class="event__offer-title">${off[0]}</span>
+        <span class="event__offer-title">${offerName}</span>
         &plus;
-        &euro;&nbsp;<span class="event__offer-price">${off[1]}</span>
+        &euro;&nbsp;<span class="event__offer-price">${offerPrice}</span>
       </li>`;
       }
       return result;
