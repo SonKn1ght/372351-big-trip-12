@@ -25,10 +25,7 @@ export default class Api {
 
   getOffers() {
     return this._load({url: `offers`})
-      .then(Api.toJSON)
-      .then((offers) => {
-        return offers;
-      });
+      .then(Api.toJSON);
   }
 
   getDestinations() {
@@ -36,7 +33,7 @@ export default class Api {
       .then(Api.toJSON);
   }
 
-  updateEventItems(eventItem) {
+  updateEventItem(eventItem) {
     return this._load({
       url: `points/${eventItem.id}`,
       method: Method.PUT,

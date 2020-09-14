@@ -1,6 +1,5 @@
 import AbstractView from './abstract.js';
 // сюда офферы пока передаются напрямую из моков, будет переделано
-import {CATALOG_OFFERS} from '../mock/offers.js';
 
 
 export default class TripInfo extends AbstractView {

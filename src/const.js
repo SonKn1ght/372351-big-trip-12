@@ -52,4 +52,3 @@ export const ACTIVITY_POINTS = [
   `Sightseeing`,
   `Restaurant`
 ];
-const POINTS_TYPE = TRANSFER_POINTS.concat(ACTIVITY_POINTS);

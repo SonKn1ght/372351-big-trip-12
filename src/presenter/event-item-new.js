@@ -27,10 +27,7 @@ export default class EventItemNew {
     this._eventEditComponent = new EventEditView(this._availableOffers, this._itemEvent, this._availableDestinations, true);
     this._eventEditComponent.setFormSubmitHandler(this._handleFormSubmit);
     this._eventEditComponent.setEventDeleteHandler(this._handleDeleteClick);
-
-    // вставляет не туда, куда нужно, должно добавляться после соритровки.
     render(this._tripContainer, this._eventEditComponent, RenderPosition.AFTERBEGIN);
-
     document.addEventListener(`keydown`, this._escKeyDownHandler);
   }
 

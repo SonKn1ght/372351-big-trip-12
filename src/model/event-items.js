@@ -93,11 +93,14 @@ export default class EventItems extends Observer {
           'date_from': eventItem.timeStart.toISOString(),
           'date_to': eventItem.timeEnd.toISOString()
         });
-    delete eventItem.dataSort;
-    delete eventItem.iconPoint;
-    delete eventItem.timeStart;
-    delete eventItem.timeEnd;
-
+    delete adaptedEventItem.cost;
+    delete adaptedEventItem.dataSort;
+    delete adaptedEventItem.offer;
+    delete adaptedEventItem.isFavorite;
+    delete adaptedEventItem.iconPoint;
+    delete adaptedEventItem.timeStart;
+    delete adaptedEventItem.timeEnd;
+    delete adaptedEventItem.pointType;
     return adaptedEventItem;
   }
 }

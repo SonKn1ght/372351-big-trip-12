@@ -9,13 +9,12 @@ export default class EventEdit extends SmartView {
 
   constructor(availableOffers, itemEvent = newItemEventDefault, availableDestinations, newEvent = false) {
     super();
+
     this._data = itemEvent;
     this._newEvent = newEvent;
 
-
     this._availableOffers = availableOffers;
     this._availableDestinations = availableDestinations;
-
 
     this._dataPickerStart = null;
     this._dataPickerEnd = null;
@@ -27,11 +26,10 @@ export default class EventEdit extends SmartView {
     this._costInputHandler = this._costInputHandler.bind(this);
     this._offerSelectionHandler = this._offerSelectionHandler.bind(this);
     this._favoriteClickHandler = this._favoriteClickHandler.bind(this);
-    this._setInnerHandlers();
     this._startTimeHandler = this._startTimeHandler.bind(this);
     this._endTimeHandler = this._endTimeHandler.bind(this);
+    this._setInnerHandlers();
     this._setDatapickers();
-
   }
 
   reset(itemEvent) {
@@ -46,7 +44,6 @@ export default class EventEdit extends SmartView {
     const availableDestinations = this._availableDestinations;
 
     const formateDate = (date) => {
-      // В британском английском используется порядок день-месяц-год
       let str = date.toLocaleString(`en-GB`, {day: `2-digit`, month: `2-digit`, year: `numeric`, hour12: false, hour: `2-digit`, minute: `2-digit`});
       return str.replace(`,`, ``);
     };
@@ -61,6 +58,7 @@ export default class EventEdit extends SmartView {
       if (availableOffers.length === 0) {
         return ``;
       }
+
       return `<section class="event__section  event__section--offers">
           <h3 class="event__section-title  event__section-title--offers">Offers</h3>
 
@@ -71,7 +69,6 @@ export default class EventEdit extends SmartView {
     };
 
     const renderOffers = (offers) => {
-
       let result = ``;
       // перезапись null на пустой массив иначе отваливается из-за попытки итерации по null
       if (offer === null) {
@@ -190,7 +187,7 @@ export default class EventEdit extends SmartView {
             <span class="visually-hidden">Price</span>
             &euro;
           </label>
-          <input class="event__input  event__input--price" id="event-price-1" type="number" name="event-price" value="${cost}">
+          <input class="event__input  event__input--price" id="event-price-1" type="number" name="event-price" value="${cost}" required>
         </div>
 
         <button class="event__save-btn  btn  btn--blue" type="submit">Save</button>
@@ -238,10 +235,12 @@ export default class EventEdit extends SmartView {
 
   restoreHandlers() {
     this._setInnerHandlers();
+    this._setDatapickers();
     this.setFormSubmitHandler(this._callback.formSubmit);
     this.setEventDeleteHandler(this._callback.eventDelete);
-    this.setFavoriteClickHandler(this._callback.favoriteClick);
-    this._setDatapickers();
+    if (!this._newEvent) {
+      this.setFavoriteClickHandler(this._callback.favoriteClick);
+    }
   }
 
   _setDatapicker(property, data, selector, callback, minimumDate = false) {
@@ -251,13 +250,13 @@ export default class EventEdit extends SmartView {
     }
 
     if (data) {
-      this._dataPickerStart = flatpickr(
+      property = flatpickr(
           this.getElement().querySelector(selector),
           {
             dateFormat: `d/m/Y H:m`,
             enableTime: true,
             defaultDate: data,
-            onClose: callback,
+            onChange: callback,
             minDate: minimumDate,
           }
       );
@@ -290,6 +289,7 @@ export default class EventEdit extends SmartView {
   _startTimeHandler([userDate]) {
     // делаем дату конца равной дате начала если => дата начала назначена хронологически позже даты конца
     if (userDate > this._data.timeEnd) {
+
       this.updateData({
         timeStart: userDate,
         dataSort: dayDate(userDate),
@@ -301,13 +301,12 @@ export default class EventEdit extends SmartView {
         dataSort: dayDate(userDate)
       });
     }
-
   }
 
   _endTimeHandler([userDate]) {
     this.updateData({
       timeEnd: userDate
-    });
+    }, true);
   }
 
   _eventSelectionHandler(evt) {
@@ -332,7 +331,8 @@ export default class EventEdit extends SmartView {
   _costInputHandler(evt) {
     evt.preventDefault();
     this.updateData({
-      cost: evt.target.value
+      // преобразование к числу т.к. с дата атрибута возвращает строку
+      cost: +evt.target.value
     }, true);
   }
 
@@ -348,7 +348,7 @@ export default class EventEdit extends SmartView {
     // вносим изменения
     this.updateData({
       offer: newOffers
-    }, true);
+    });
   }
 
   _formSubmitHandler(evt) {

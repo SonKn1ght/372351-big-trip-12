@@ -7,12 +7,12 @@ import EventItemPresenter from './event-item.js';
 import EventItemNewPresenter from './event-item-new.js';
 import {remove, render, RenderPosition} from '../utils/render.js';
 import {FilterType, SortType, UpdateType, UserAction} from '../const.js';
-import {sortEventDuration, sortEventPrice, sortDefault} from '../utils/event.js';
+import {sortEventDuration, sortEventPrice} from '../utils/event.js';
 import {filter} from '../utils/filter.js';
 
 
 export default class Trip {
-  constructor(tripContainer, eventItemsModel, filterModel, availableOffersModel, availableDestinationsModel) {
+  constructor(tripContainer, eventItemsModel, filterModel, availableOffersModel, availableDestinationsModel, api) {
     this._eventItemsModel = eventItemsModel;
     this._filterModel = filterModel;
     this._availableOffersModel = availableOffersModel;
@@ -22,6 +22,7 @@ export default class Trip {
 
     this._eventItemPresenter = {};
     this._isLoading = true;
+    this._api = api;
 
     this._sortEventComponent = null;
     this._tripDaysComponent = null;
@@ -33,21 +34,23 @@ export default class Trip {
     this._handleSortTypeChange = this._handleSortTypeChange.bind(this);
     this._handleModeChange = this._handleModeChange.bind(this);
 
-    this._eventItemsModel.addObserver(this._handleModelEvent);
-    this._filterModel.addObserver(this._handleModelEvent);
-
     this._eventItemNewPresenter = new EventItemNewPresenter(this._tripContainer, this._handleViewAction, this._availableOffersModel, this._availableDestinationsModel);
   }
 
   init() {
-    // странновато, если не будет сюда добавок убрать лишний метод
+    this._eventItemsModel.addObserver(this._handleModelEvent);
+    this._filterModel.addObserver(this._handleModelEvent);
+
     this._renderEventsElement();
   }
 
   createEventItems() {
     this._currentSortType = SortType.DEFAULT;
     this._filterModel.setFilter(UpdateType.MAJOR, FilterType.EVERYTHING);
+    // удаляю сортировку => рисую новую точку => рисую сортировку. Все попадает на нужные места
+    remove(this._sortEventComponent);
     this._eventItemNewPresenter.init();
+    this._renderSortEvent();
   }
 
   _getEventItems() {
@@ -60,8 +63,7 @@ export default class Trip {
       case SortType.PRICE:
         return filteredEventItems.sort(sortEventPrice);
     }
-    // добавил сортировку по дефолту, в хронологическом порядке старта события.
-    return filteredEventItems.sort(sortDefault);
+    return filteredEventItems;
   }
 
   _handleModeChange() {
@@ -74,7 +76,9 @@ export default class Trip {
   _handleViewAction(actionType, updateType, update) {
     switch (actionType) {
       case UserAction.UPDATE_EVENT_ITEM:
-        this._eventItemsModel.updateEventItem(updateType, update);
+        this._api.updateEventItem(update).then((response) => {
+          this._eventItemsModel.updateEventItem(updateType, response);
+        });
         break;
       case UserAction.ADD_EVENT_ITEM:
         this._eventItemsModel.addEventItem(updateType, update);
@@ -127,7 +131,7 @@ export default class Trip {
     this._sortEventComponent = new SortEvent(this._currentSortType);
     this._sortEventComponent.setSortTypeChangeHandler(this._handleSortTypeChange);
 
-    render(this._tripContainer, this._sortEventComponent, RenderPosition.BEFOREEND);
+    render(this._tripContainer, this._sortEventComponent, RenderPosition.AFTERBEGIN);
   }
 
   _renderTripDays() {
@@ -142,7 +146,6 @@ export default class Trip {
   _renderEventItem(eventListElement, itemEvent, availableOffers, availableDestinations) {
     const eventItemPresenter = new EventItemPresenter(eventListElement, this._handleViewAction, this._handleModeChange);
     eventItemPresenter.init(itemEvent, availableOffers, availableDestinations);
-    // сохраняем ссылки на точки в отдельное свойство
     this._eventItemPresenter[itemEvent.id] = eventItemPresenter;
   }
 
@@ -163,25 +166,18 @@ export default class Trip {
     }
 
     uniqueTripDays.forEach((currentDay) => {
-      // создаем день
       const eventListElement = new DayItem(count, currentDay);
       count++;
-
-      // рисуем день
       render(this._tripDaysComponent, eventListElement, RenderPosition.BEFOREEND);
-      // находим в дне элемент в который пишем точки
       const tripEventsList = eventListElement.getElement().querySelector(`.trip-events__list`);
-      // пишем в переменную точки
       let currentDayItemsEvent = itemsEvent;
       if (this._currentSortType === SortType.DEFAULT) {
-        // получем точки только для этого дня если рисовка по умолчанию
         currentDayItemsEvent = itemsEvent
           .slice()
           .filter((itemEvent) => {
             return itemEvent.dataSort === currentDay;
           });
       }
-      // рисуем точки по итоговым данным
       currentDayItemsEvent.forEach((point) => {
         this._renderEventItem(tripEventsList, point, this._availableOffersModel, this._availableDestinationsModel);
       });
@@ -210,7 +206,6 @@ export default class Trip {
     }
 
     const eventItems = this._getEventItems();
-    // console.log(this._getEventItems())
     if (eventItems.length === 0) {
       this._renderNoEvent();
       return;

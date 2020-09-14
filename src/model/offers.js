@@ -4,7 +4,7 @@ export default class Offers extends Observer {
   constructor() {
     super();
 
-    this._availableOffers = null;
+    this._availableOffers = [];
   }
 
   setAvailableOffers(updateType, offers) {
@@ -14,8 +14,12 @@ export default class Offers extends Observer {
   }
 
   getAvailableOffers(pointType) {
-    // отдаем набор опций под тип точки
-    // return this._availableOffers;
+    if (this._availableOffers.length === 0) {
+      return {
+        offers: [],
+        type: pointType.toLowerCase()
+      };
+    }
     return this._availableOffers.filter((current) => {
       return current.type === pointType.toLowerCase();
     })[0];
