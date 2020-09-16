@@ -38,18 +38,32 @@ export default class Trip {
   }
 
   init() {
+    // если уже было отрисовано, снова не рисовать, сначала вызвать удаление где надо и только потом рисовать
+    if (this._sortEventComponent !== null && this._tripDaysComponent !== null) {
+      return;
+    }
+
     this._eventItemsModel.addObserver(this._handleModelEvent);
     this._filterModel.addObserver(this._handleModelEvent);
 
     this._renderEventsElement();
   }
 
-  createEventItems() {
-    this._currentSortType = SortType.DEFAULT;
-    this._filterModel.setFilter(UpdateType.MAJOR, FilterType.EVERYTHING);
+  destroy() {
+    this._clearEventsElement(true);
+
+    this._eventItemsModel.removeObserver(this._handleModelEvent);
+    this._filterModel.removeObserver(this._handleModelEvent);
+
+    // при разрушении обнуляем компоненты
+    this._sortEventComponent = null;
+    this._tripDaysComponent = null;
+  }
+
+  createEventItems(callback) {
     // удаляю сортировку => рисую новую точку => рисую сортировку. Все попадает на нужные места
     remove(this._sortEventComponent);
-    this._eventItemNewPresenter.init();
+    this._eventItemNewPresenter.init(callback);
     this._renderSortEvent();
   }
 
@@ -184,7 +198,7 @@ export default class Trip {
     });
   }
 
-  _clearEventsElement() {
+  _clearEventsElement(resetSortType = false) {
     this._eventItemNewPresenter.destroy();
     Object
       .values(this._eventItemPresenter)
@@ -197,6 +211,10 @@ export default class Trip {
     remove(this._noEventComponent);
     remove(this._tripDaysComponent);
     remove(this._loadingComponent);
+
+    if (resetSortType) {
+      this._currentSortType = SortType.DEFAULT;
+    }
   }
 
   _renderEventsElement() {

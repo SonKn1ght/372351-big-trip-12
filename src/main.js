@@ -7,8 +7,10 @@ import FilterModel from './model/filter.js';
 import {render, RenderPosition} from './utils/render.js';
 import OffersModel from './model/offers.js';
 import DestinationsModel from './model/destinations.js';
-import {UpdateType} from './const.js';
+import {FilterType, UpdateType} from './const.js';
 import Api from './api.js';
+import NewEventItemButtonView from './view/new-event-item-button.js';
+import {TabType} from './const.js';
 
 
 const AUTHORIZATION = `Basic hfcrwtn2f2kbz,kjyb`;
@@ -30,6 +32,36 @@ const tabs = new Tabs();
 render(controlElement, tabs.getElementBeforeTitle(), RenderPosition.BEFOREEND);
 render(controlElement, tabs, RenderPosition.BEFOREEND);
 
+const handleTabsClick = (tabsItem) => {
+  switch (tabsItem) {
+    case TabType.TABLE:
+      tripPresenter.init();
+      // filterModel.setFilter(UpdateType.MAJOR, FilterType.EVERYTHING);
+      break;
+    case TabType.STATS:
+      tripPresenter.destroy();
+      // filterModel.setFilter(UpdateType.MAJOR, FilterType.EVERYTHING);
+      break;
+  }
+};
+tabs.setClickTabsHandler(handleTabsClick);
+
+
+const newEventItemButton = new NewEventItemButtonView();
+render(mainElement, newEventItemButton, RenderPosition.BEFOREEND);
+
+const handleNewEventItemButtonClick = () => {
+  tripPresenter.destroy();
+  filterModel.setFilter(UpdateType.MAJOR, FilterType.EVERYTHING);
+  tripPresenter.init();
+  tripPresenter.createEventItems(() => {
+    newEventItemButton.enable();
+  });
+  newEventItemButton.disable();
+};
+
+newEventItemButton.setClickNewEventItemButtonHandler(handleNewEventItemButtonClick);
+
 const filterPresenter = new FilterPresenter(controlElement, filterModel);
 
 const eventsElement = document.querySelector(`.trip-events`);
@@ -37,10 +69,6 @@ const eventsElement = document.querySelector(`.trip-events`);
 const tripPresenter = new TripPresenter(eventsElement, eventItemsModel, filterModel, availableOffersModel, availableDestinationsModel, api);
 tripPresenter.init();
 
-document.querySelector(`.trip-main__event-add-btn`).addEventListener(`click`, (evt) => {
-  evt.preventDefault();
-  tripPresenter.createEventItems();
-});
 // сначала проверяем загрузку оферов, потом destination, и только после точки. Иначе при отрисовке редактирования возможно недополучение данных и некорректное отображение редактирования точки. Либо без списка доступных пунктков - либо без предложений
 Promise.all([
   api.getOffers(),

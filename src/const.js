@@ -52,3 +52,8 @@ export const ACTIVITY_POINTS = [
   `Sightseeing`,
   `Restaurant`
 ];
+
+export const TabType = {
+  TABLE: `Table`,
+  STATS: `Stats`
+};
