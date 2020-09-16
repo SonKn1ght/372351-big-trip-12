@@ -5,6 +5,7 @@ export default class Tabs extends AbstractView {
   constructor() {
     super();
     this._beforeTitle = null;
+    this._currentTypeTab = TabType.TABLE;
 
     this._tabsClickHandler = this._tabsClickHandler.bind(this);
   }
@@ -25,10 +26,32 @@ export default class Tabs extends AbstractView {
       return;
     }
     evt.preventDefault();
-    if (evt.target.dataset.value === TabType.TABLE) {
-
+    // проверка на то была ли смена типа таба или нет, если не было была дергаем метод меняющий клас на активный таб
+    if (this._currentTypeTab === evt.target.dataset.value) {
+      return;
     }
+    this.switchActive();
+    this._currentTypeTab = evt.target.dataset.value;
+
     this._callback.tabsClick(evt.target.dataset.value);
+  }
+
+  switchActive(newEventItem = false) {
+    const tabsElement = this.getElement().querySelectorAll(`.trip-tabs__btn`);
+
+    if (newEventItem) {
+      if (tabsElement[1].classList.contains(`trip-tabs__btn--active`)) {
+        this._currentTypeTab = TabType.TABLE;
+        this.switchActive();
+        return;
+      } else {
+        return;
+      }
+    }
+
+    tabsElement.forEach((current) => {
+      current.classList.toggle(`trip-tabs__btn--active`);
+    });
   }
 
   setClickTabsHandler(callback) {
