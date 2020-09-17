@@ -25,19 +25,19 @@ export default class EventItem {
     this._handleFavoriteClick = this._handleFavoriteClick.bind(this);
   }
 
-  init(itemEvent, availableOffers) {
+  init(itemEvent, availableOffers, availableDestinations) {
+
     this._itemEvent = itemEvent;
     const prevEventItemComponent = this._itemEventComponent;
     const prevEventEditComponent = this._eventEditComponent;
 
-    this._itemEventComponent = new EventItemView(itemEvent, availableOffers);
-    this._eventEditComponent = new EventEditView(availableOffers, itemEvent);
+    this._itemEventComponent = new EventItemView(itemEvent);
+    this._eventEditComponent = new EventEditView(availableOffers, itemEvent, availableDestinations);
 
     this._itemEventComponent.setEditClickHandler(this._handleEditClick);
     this._eventEditComponent.setFormSubmitHandler(this._handleFormSubmit);
     this._eventEditComponent.setEventDeleteHandler(this._handleDeleteClick);
     this._eventEditComponent.setFavoriteClickHandler(this._handleFavoriteClick);
-
 
     if (prevEventItemComponent === null || prevEventEditComponent === null) {
       render(this._tripEventsList, this._itemEventComponent, RenderPosition.BEFOREEND);
@@ -114,7 +114,11 @@ export default class EventItem {
         UserAction.UPDATE_EVENT_ITEM,
         UpdateType.MINOR,
         Object.assign(
-            {}, this._itemEvent, {isFavorite: !this._itemEvent.isFavorite}
+            {},
+            this._itemEvent,
+            {
+              isFavorite: !this._itemEvent.isFavorite
+            }
         )
     );
   }

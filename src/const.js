@@ -13,11 +13,49 @@ export const UserAction = {
 export const UpdateType = {
   PATCH: `PATCH`,
   MINOR: `MINOR`,
-  MAJOR: `MAJOR`
+  MAJOR: `MAJOR`,
+  INIT: `INIT`
 };
 
 export const FilterType = {
   EVERYTHING: `everything`,
   FUTURE: `future`,
   PAST: `past`
+};
+
+// объект с данными по умолчанию - для запуска формы редактирования-создания в момент создания точки
+export const newItemEventDefault = {
+  pointType: `Taxi`,
+  iconPoint: `taxi.png`,
+  destination: `Chamonix`,
+  timeStart: new Date(),
+  timeEnd: new Date(),
+  description: ``,
+  availableOffers: [],
+  offer: [],
+  photos: [],
+  cost: `1`,
+  isFavorite: false
+};
+
+export const TRANSFER_POINTS = [
+  `Taxi`,
+  `Bus`,
+  `Train`,
+  `Ship`,
+  `Transport`,
+  `Drive`,
+  `Flight`
+];
+export const ACTIVITY_POINTS = [
+  `Check-in`,
+  `Sightseeing`,
+  `Restaurant`
+];
+
+export const ALL_POINTS = TRANSFER_POINTS.concat(ACTIVITY_POINTS);
+
+export const TabType = {
+  TABLE: `Table`,
+  STATS: `Stats`
 };
