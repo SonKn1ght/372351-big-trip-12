@@ -1,20 +1,62 @@
 import AbstractView from './abstract.js';
+import {TabType} from '../const.js';
 
 export default class Tabs extends AbstractView {
   constructor() {
     super();
     this._beforeTitle = null;
+    this._currentTypeTab = TabType.TABLE;
+
+    this._tabsClickHandler = this._tabsClickHandler.bind(this);
   }
 
   _getTemplate() {
     return `<nav class="trip-controls__trip-tabs  trip-tabs">
-      <a class="trip-tabs__btn  trip-tabs__btn--active" href="#">Table</a>
-      <a class="trip-tabs__btn" href="#">Stats</a>
+      <a class="trip-tabs__btn  trip-tabs__btn--active" href="#" data-value="Table">Table</a>
+      <a class="trip-tabs__btn" href="#" data-value="Stats">Stats</a>
     </nav>`;
   }
 
   _getTemplateBeforeTitle() {
     return `<h2 class="visually-hidden">Switch trip view</h2>`;
+  }
+
+  _tabsClickHandler(evt) {
+    if (evt.target.tagName !== `A`) {
+      return;
+    }
+    evt.preventDefault();
+    // проверка на то была ли смена типа таба или нет, если не было была дергаем метод меняющий клас на активный таб
+    if (this._currentTypeTab === evt.target.dataset.value) {
+      return;
+    }
+    this.switchActive();
+    this._currentTypeTab = evt.target.dataset.value;
+
+    this._callback.tabsClick(evt.target.dataset.value);
+  }
+
+  switchActive(newEventItem = false) {
+    const tabsElement = this.getElement().querySelectorAll(`.trip-tabs__btn`);
+
+    if (newEventItem) {
+      if (tabsElement[1].classList.contains(`trip-tabs__btn--active`)) {
+        this._currentTypeTab = TabType.TABLE;
+        this.switchActive();
+        return;
+      } else {
+        return;
+      }
+    }
+
+    tabsElement.forEach((current) => {
+      current.classList.toggle(`trip-tabs__btn--active`);
+    });
+  }
+
+  setClickTabsHandler(callback) {
+    this._callback.tabsClick = callback;
+    this.getElement().addEventListener(`click`, this._tabsClickHandler);
   }
 
   removeElement() {

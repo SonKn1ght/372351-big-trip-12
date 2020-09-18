@@ -13,16 +13,18 @@ export default class EventItemNew {
     this._availableDestinations = availableDestinationsModel;
 
     this._eventEditComponent = null;
+    this._destroyCallback = null;
 
     this._handleFormSubmit = this._handleFormSubmit.bind(this);
     this._handleDeleteClick = this._handleDeleteClick.bind(this);
     this._escKeyDownHandler = this._escKeyDownHandler.bind(this);
   }
 
-  init() {
+  init(callback) {
     if (this._eventEditComponent !== null) {
       return;
     }
+    this._destroyCallback = callback;
 
     this._eventEditComponent = new EventEditView(this._availableOffers, this._itemEvent, this._availableDestinations, true);
     this._eventEditComponent.setFormSubmitHandler(this._handleFormSubmit);
@@ -38,6 +40,9 @@ export default class EventItemNew {
 
     remove(this._eventEditComponent);
     this._eventEditComponent = null;
+    if (this._destroyCallback !== null) {
+      this._destroyCallback();
+    }
 
     document.removeEventListener(`keydown`, this._escKeyDownHandler);
   }

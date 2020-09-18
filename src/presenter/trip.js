@@ -6,7 +6,7 @@ import Loading from '../view/loading.js';
 import EventItemPresenter from './event-item.js';
 import EventItemNewPresenter from './event-item-new.js';
 import {remove, render, RenderPosition} from '../utils/render.js';
-import {FilterType, SortType, UpdateType, UserAction} from '../const.js';
+import {SortType, UpdateType, UserAction} from '../const.js';
 import {sortEventDuration, sortEventPrice} from '../utils/event.js';
 import {filter} from '../utils/filter.js';
 
@@ -38,18 +38,29 @@ export default class Trip {
   }
 
   init() {
+    if (this._sortEventComponent !== null && this._tripDaysComponent !== null) {
+      return;
+    }
+
     this._eventItemsModel.addObserver(this._handleModelEvent);
     this._filterModel.addObserver(this._handleModelEvent);
 
     this._renderEventsElement();
   }
 
-  createEventItems() {
-    this._currentSortType = SortType.DEFAULT;
-    this._filterModel.setFilter(UpdateType.MAJOR, FilterType.EVERYTHING);
-    // удаляю сортировку => рисую новую точку => рисую сортировку. Все попадает на нужные места
+  destroy() {
+    this._clearEventsElement(true);
+
+    this._eventItemsModel.removeObserver(this._handleModelEvent);
+    this._filterModel.removeObserver(this._handleModelEvent);
+
+    this._sortEventComponent = null;
+    this._tripDaysComponent = null;
+  }
+
+  createEventItems(callback) {
     remove(this._sortEventComponent);
-    this._eventItemNewPresenter.init();
+    this._eventItemNewPresenter.init(callback);
     this._renderSortEvent();
   }
 
@@ -90,7 +101,6 @@ export default class Trip {
   }
 
   _handleModelEvent(updateType, data) {
-    // при изменениие Favorit => Minor перерисовка только карточки, Мajor при отправке формы
     switch (updateType) {
       case UpdateType.MINOR:
         this._eventItemPresenter[data.id].init(data, this._availableOffersModel, this._availableDestinationsModel);
@@ -184,7 +194,7 @@ export default class Trip {
     });
   }
 
-  _clearEventsElement() {
+  _clearEventsElement(resetSortType = false) {
     this._eventItemNewPresenter.destroy();
     Object
       .values(this._eventItemPresenter)
@@ -197,6 +207,10 @@ export default class Trip {
     remove(this._noEventComponent);
     remove(this._tripDaysComponent);
     remove(this._loadingComponent);
+
+    if (resetSortType) {
+      this._currentSortType = SortType.DEFAULT;
+    }
   }
 
   _renderEventsElement() {

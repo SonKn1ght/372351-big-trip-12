@@ -27,14 +27,14 @@ export const FilterType = {
 export const newItemEventDefault = {
   pointType: `Taxi`,
   iconPoint: `taxi.png`,
-  destination: `House`,
+  destination: `Chamonix`,
   timeStart: new Date(),
   timeEnd: new Date(),
   description: ``,
   availableOffers: [],
   offer: [],
   photos: [],
-  cost: ``,
+  cost: `1`,
   isFavorite: false
 };
 
@@ -52,3 +52,10 @@ export const ACTIVITY_POINTS = [
   `Sightseeing`,
   `Restaurant`
 ];
+
+export const ALL_POINTS = TRANSFER_POINTS.concat(ACTIVITY_POINTS);
+
+export const TabType = {
+  TABLE: `Table`,
+  STATS: `Stats`
+};
