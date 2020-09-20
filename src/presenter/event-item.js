@@ -5,7 +5,13 @@ import {UserAction, UpdateType} from '../const.js';
 
 const Mode = {
   DEFAULT: `DEFAULT`,
-  EDITING: `EDITING`
+  EDITING: `EDITING`,
+  ABORTING: `ABORTING`
+};
+
+export const State = {
+  SAVING: `SAVING`,
+  DELETING: `DELETING`
 };
 
 export default class EventItem {
@@ -48,7 +54,8 @@ export default class EventItem {
     }
 
     if (this._mode === Mode.EDITING) {
-      replace(this._eventEditComponent, prevEventEditComponent);
+      replace(this._itemEventComponent, prevEventEditComponent);
+      this._mode = Mode.DEFAULT;
     }
 
     remove(prevEventItemComponent);
@@ -66,7 +73,36 @@ export default class EventItem {
     }
   }
 
-  _replaceEventToEdit() {
+  setViewState(state) {
+    const resetFormState = () => {
+      this._eventEditComponent.updateData({
+        isDisabled: false,
+        isSaving: false,
+        isDeleting: false
+      });
+    };
+
+    switch (state) {
+      case State.SAVING:
+        this._eventEditComponent.updateData({
+          isDisabled: true,
+          isSaving: true
+        });
+        break;
+      case State.DELETING:
+        this._eventEditComponent.updateData({
+          isDisabled: true,
+          isDeleting: true
+        });
+        break;
+      case State.ABORTING:
+        this._itemEventComponent.shake(resetFormState);
+        this._eventEditComponent.shake(resetFormState);
+        break;
+    }
+  }
+
+  replaceEventToEdit() {
     replace(this._eventEditComponent, this._itemEventComponent);
     document.addEventListener(`keydown`, this._escKeyDownHandler);
     this._changeMode();
@@ -88,16 +124,14 @@ export default class EventItem {
   }
 
   _handleEditClick() {
-    this._replaceEventToEdit();
+    this.replaceEventToEdit();
   }
 
   _handleFormSubmit(eventItem) {
-    // не забыть завести проверку на минор-мажор
     this._changeData(
         UserAction.UPDATE_EVENT_ITEM,
         UpdateType.MAJOR,
         eventItem);
-    this._replaceEditToEvent();
   }
 
   _handleDeleteClick(eventItem) {

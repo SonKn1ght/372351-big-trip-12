@@ -34,7 +34,3 @@ export const formatEventDuration = (timeStart, timeEnd) => {
 
   return `${addZero(duration.minutes())}M`;
 };
-
-export const generateId = () => {
-  return Date.now() + parseInt(Math.random() * 10000, 10);
-};

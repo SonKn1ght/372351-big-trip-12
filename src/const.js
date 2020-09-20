@@ -23,21 +23,6 @@ export const FilterType = {
   PAST: `past`
 };
 
-// объект с данными по умолчанию - для запуска формы редактирования-создания в момент создания точки
-export const newItemEventDefault = {
-  pointType: `Taxi`,
-  iconPoint: `taxi.png`,
-  destination: `Chamonix`,
-  timeStart: new Date(),
-  timeEnd: new Date(),
-  description: ``,
-  availableOffers: [],
-  offer: [],
-  photos: [],
-  cost: `1`,
-  isFavorite: false
-};
-
 export const TRANSFER_POINTS = [
   `Taxi`,
   `Bus`,
