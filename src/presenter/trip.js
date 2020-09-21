@@ -5,8 +5,8 @@ import TripDays from '../view/trip-day.js';
 import Loading from '../view/loading.js';
 import EventItemPresenter, {State as EventItemPresenterViewState} from './event-item.js';
 import EventItemNewPresenter from './event-item-new.js';
-import {remove, render, RenderPosition} from '../utils/render.js';
-import {SortType, UpdateType, UserAction} from '../const.js';
+import {remove, render} from '../utils/render.js';
+import {SortType, UpdateType, UserAction, RenderPosition} from '../const.js';
 import {sortEventDuration, sortEventPrice, sortDefault} from '../utils/event.js';
 import {filter} from '../utils/filter.js';
 
@@ -77,6 +77,109 @@ export default class Trip {
     return filteredEventItems.sort(sortDefault);
   }
 
+  _renderLoading() {
+    render(this._tripContainer, this._loadingComponent, RenderPosition.AFTERBEGIN);
+  }
+
+  _renderNoEvent() {
+    render(this._tripContainer, this._noEventComponent, RenderPosition.BEFOREEND);
+  }
+
+  _renderSortEvent() {
+    if (this._sortEventComponent !== null) {
+      this._sortEventComponent = null;
+    }
+    this._sortEventComponent = new SortEvent(this._currentSortType);
+    this._sortEventComponent.setSortTypeChangeHandler(this._handleSortTypeChange);
+
+    render(this._tripContainer, this._sortEventComponent, RenderPosition.AFTERBEGIN);
+  }
+
+  _renderTripDays() {
+    if (this._tripDaysComponent !== null) {
+      this._tripDaysComponent = null;
+    }
+    this._tripDaysComponent = new TripDays();
+
+    render(this._tripContainer, this._tripDaysComponent, RenderPosition.BEFOREEND);
+  }
+
+  _renderEventItem(eventListElement, itemEvent, availableOffers, availableDestinations) {
+    const eventItemPresenter = new EventItemPresenter(eventListElement, this._handleViewAction, this._handleModeChange);
+    eventItemPresenter.init(itemEvent, availableOffers, availableDestinations);
+    this._eventItemPresenter[itemEvent.id] = eventItemPresenter;
+  }
+
+  _renderEventList(itemsEvent) {
+    let uniqueTripDays = [];
+    let count;
+
+    if (this._currentSortType === SortType.DEFAULT) {
+      for (const item of itemsEvent) {
+        uniqueTripDays.push(item.dataSort);
+      }
+      uniqueTripDays = Array.from(new Set(uniqueTripDays));
+      count = 1;
+    } else {
+      uniqueTripDays = [``];
+      count = ``;
+    }
+
+    uniqueTripDays.forEach((currentDay) => {
+      const eventListElement = new DayItem(count, currentDay);
+      count++;
+      render(this._tripDaysComponent, eventListElement, RenderPosition.BEFOREEND);
+      const tripEventsList = eventListElement.getElement().querySelector(`.trip-events__list`);
+      let currentDayItemsEvent = itemsEvent;
+      if (this._currentSortType === SortType.DEFAULT) {
+        currentDayItemsEvent = itemsEvent
+          .slice()
+          .filter((itemEvent) => {
+            return itemEvent.dataSort === currentDay;
+          });
+      }
+      currentDayItemsEvent.forEach((point) => {
+        this._renderEventItem(tripEventsList, point, this._availableOffersModel, this._availableDestinationsModel);
+      });
+    });
+  }
+
+  _clearEventsElement(resetSortType = false) {
+    this._eventItemNewPresenter.destroy();
+    Object
+      .values(this._eventItemPresenter)
+      .forEach((presenter) => {
+        presenter.destroy();
+      });
+    this._eventItemPresenter = {};
+
+    remove(this._sortEventComponent);
+    remove(this._noEventComponent);
+    remove(this._tripDaysComponent);
+    remove(this._loadingComponent);
+
+    if (resetSortType) {
+      this._currentSortType = SortType.DEFAULT;
+    }
+  }
+
+  _renderEventsElement() {
+    if (this._isLoading) {
+      this._renderLoading();
+      return;
+    }
+
+    const eventItems = this._getEventItems();
+    if (eventItems.length === 0) {
+      this._renderNoEvent();
+      return;
+    }
+
+    this._renderSortEvent();
+    this._renderTripDays();
+    this._renderEventList(eventItems);
+  }
+
   _handleModeChange() {
     this._eventItemNewPresenter.destroy();
     Object
@@ -144,109 +247,5 @@ export default class Trip {
     this._currentSortType = sortType;
     this._clearEventsElement();
     this._renderEventsElement();
-  }
-
-  _renderLoading() {
-    render(this._tripContainer, this._loadingComponent, RenderPosition.AFTERBEGIN);
-  }
-
-  _renderNoEvent() {
-    render(this._tripContainer, this._noEventComponent, RenderPosition.BEFOREEND);
-  }
-
-  _renderSortEvent() {
-    if (this._sortEventComponent !== null) {
-      this._sortEventComponent = null;
-    }
-    this._sortEventComponent = new SortEvent(this._currentSortType);
-    this._sortEventComponent.setSortTypeChangeHandler(this._handleSortTypeChange);
-
-    render(this._tripContainer, this._sortEventComponent, RenderPosition.AFTERBEGIN);
-  }
-
-  _renderTripDays() {
-    if (this._tripDaysComponent !== null) {
-      this._tripDaysComponent = null;
-    }
-    this._tripDaysComponent = new TripDays();
-
-    render(this._tripContainer, this._tripDaysComponent, RenderPosition.BEFOREEND);
-  }
-
-  _renderEventItem(eventListElement, itemEvent, availableOffers, availableDestinations) {
-    const eventItemPresenter = new EventItemPresenter(eventListElement, this._handleViewAction, this._handleModeChange);
-    eventItemPresenter.init(itemEvent, availableOffers, availableDestinations);
-    this._eventItemPresenter[itemEvent.id] = eventItemPresenter;
-  }
-
-  _renderEventList(itemsEvent) {
-    let uniqueTripDays;
-    let count;
-
-    if (this._currentSortType === SortType.DEFAULT) {
-      let days = [];
-      for (const item of itemsEvent) {
-        days.push(item.dataSort);
-      }
-      uniqueTripDays = Array.from(new Set(days));
-      count = 1;
-    } else {
-      uniqueTripDays = [``];
-      count = ``;
-    }
-
-    uniqueTripDays.forEach((currentDay) => {
-      const eventListElement = new DayItem(count, currentDay);
-      count++;
-      render(this._tripDaysComponent, eventListElement, RenderPosition.BEFOREEND);
-      const tripEventsList = eventListElement.getElement().querySelector(`.trip-events__list`);
-      let currentDayItemsEvent = itemsEvent;
-      if (this._currentSortType === SortType.DEFAULT) {
-        currentDayItemsEvent = itemsEvent
-          .slice()
-          .filter((itemEvent) => {
-            return itemEvent.dataSort === currentDay;
-          });
-      }
-      currentDayItemsEvent.forEach((point) => {
-        this._renderEventItem(tripEventsList, point, this._availableOffersModel, this._availableDestinationsModel);
-      });
-    });
-  }
-
-  _clearEventsElement(resetSortType = false) {
-    this._eventItemNewPresenter.destroy();
-    Object
-      .values(this._eventItemPresenter)
-      .forEach((presenter) => {
-        presenter.destroy();
-      });
-    this._eventItemPresenter = {};
-
-    remove(this._sortEventComponent);
-    remove(this._noEventComponent);
-    remove(this._tripDaysComponent);
-    remove(this._loadingComponent);
-
-    if (resetSortType) {
-      this._currentSortType = SortType.DEFAULT;
-    }
-  }
-
-  _renderEventsElement() {
-    if (this._isLoading) {
-      this._renderLoading();
-      return;
-    }
-
-    const eventItems = this._getEventItems();
-    if (eventItems.length === 0) {
-      this._renderNoEvent();
-      return;
-    }
-
-    this._renderSortEvent();
-    this._renderTripDays();
-    this._renderEventList(eventItems);
   }
 }

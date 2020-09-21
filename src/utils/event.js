@@ -10,7 +10,6 @@ export const sortEventDuration = (eventA, eventB) => {
   return (eventA.timeStart - eventA.timeEnd) - (eventB.timeStart - eventB.timeEnd);
 };
 
-// в т.з. явно не описано, сортирую по стоимости точки, без учета стоимости предложений
 export const sortEventPrice = (eventA, eventB) => {
   return eventB.cost - eventA.cost;
 };

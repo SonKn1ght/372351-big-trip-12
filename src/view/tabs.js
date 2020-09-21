@@ -21,19 +21,9 @@ export default class Tabs extends AbstractView {
     return `<h2 class="visually-hidden">Switch trip view</h2>`;
   }
 
-  _tabsClickHandler(evt) {
-    if (evt.target.tagName !== `A`) {
-      return;
-    }
-    evt.preventDefault();
-    // проверка на то была ли смена типа таба или нет, если не было была дергаем метод меняющий клас на активный таб
-    if (this._currentTypeTab === evt.target.dataset.value) {
-      return;
-    }
-    this.switchActive();
-    this._currentTypeTab = evt.target.dataset.value;
-
-    this._callback.tabsClick(evt.target.dataset.value);
+  removeElement() {
+    this._element = null;
+    this._beforeTitle = null;
   }
 
   switchActive(newEventItem = false) {
@@ -54,14 +44,23 @@ export default class Tabs extends AbstractView {
     });
   }
 
+  _tabsClickHandler(evt) {
+    if (evt.target.tagName !== `A`) {
+      return;
+    }
+    evt.preventDefault();
+    if (this._currentTypeTab === evt.target.dataset.value) {
+      return;
+    }
+    this.switchActive();
+    this._currentTypeTab = evt.target.dataset.value;
+
+    this._callback.tabsClick(evt.target.dataset.value);
+  }
+
   setClickTabsHandler(callback) {
     this._callback.tabsClick = callback;
     this.getElement().addEventListener(`click`, this._tabsClickHandler);
-  }
-
-  removeElement() {
-    this._element = null;
-    this._beforeTitle = null;
   }
 }
 

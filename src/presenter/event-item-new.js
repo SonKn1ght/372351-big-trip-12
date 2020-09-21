@@ -1,6 +1,6 @@
 import EventEditView from '../view/event-edit.js';
-import {remove, render, RenderPosition} from '../utils/render.js';
-import {UserAction, UpdateType} from '../const.js';
+import {remove, render} from '../utils/render.js';
+import {UserAction, UpdateType, RenderPosition} from '../const.js';
 
 export default class EventItemNew {
   constructor(tripContainer, changeData, availableOffersModel, availableDestinationsModel) {

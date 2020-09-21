@@ -4,6 +4,11 @@ export const SortType = {
   PRICE: `price`
 };
 
+export const RenderPosition = {
+  AFTERBEGIN: `afterbegin`,
+  BEFOREEND: `beforeend`
+};
+
 export const UserAction = {
   UPDATE_EVENT_ITEM: `UPDATE_EVENT_ITEM`,
   ADD_EVENT_ITEM: `ADD_EVENT_ITEM`,
@@ -11,7 +16,6 @@ export const UserAction = {
 };
 
 export const UpdateType = {
-  PATCH: `PATCH`,
   MINOR: `MINOR`,
   MAJOR: `MAJOR`,
   INIT: `INIT`

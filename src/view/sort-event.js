@@ -19,7 +19,7 @@ export default class SortEvent extends AbstractView {
       </div>
 
       <div class="trip-sort__item  trip-sort__item--time">
-        <input id="sort-time" class="trip-sort__input  visually-hidden" type="radio" name="trip-sort" value="sort-time"data-sort-type="${SortType.DURATION}" ${this._currentSortType === SortType.DURATION ? `checked` : ``}>
+        <input id="sort-time" class="trip-sort__input  visually-hidden" type="radio" name="trip-sort" value="sort-time" data-sort-type="${SortType.DURATION}" ${this._currentSortType === SortType.DURATION ? `checked` : ``}>
         <label class="trip-sort__btn" for="sort-time" >
           Time
           <svg class="trip-sort__direction-icon" width="8" height="10" viewBox="0 0 8 10">

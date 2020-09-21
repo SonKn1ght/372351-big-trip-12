@@ -3,11 +3,122 @@ import SmartView from './smart.js';
 import {addPreposition} from '../utils/event.js';
 import flatpickr from 'flatpickr';
 import '../../node_modules/flatpickr/dist/flatpickr.min.css';
-import {dayDate, checkForElementArray} from '../utils/common.js';
+import {formateDayDate, checkForElementArray} from '../utils/common.js';
+
+const formatDate = (date) => {
+  let str = date.toLocaleString(`en-GB`, {day: `2-digit`, month: `2-digit`, year: `numeric`, hour12: false, hour: `2-digit`, minute: `2-digit`});
+  return str.replace(`,`, ``);
+};
+
+const renderPhotos = (allPhotos) => {
+  if (allPhotos.length === 0) {
+    return ``;
+  }
+  return allPhotos.reduce((result, photo) => {
+    return (result + `<img class="event__photo" src="${photo.src}" alt="photo.description">`);
+  }, ``);
+};
+
+const renderOffers = (offer, isDisable, availableOffers) => {
+  let result = ``;
+  if (offer === null) {
+    offer = [];
+  }
+
+  const offersTitle = offer.map((current) => {
+    return current.title;
+  });
+  const offersPrice = offer.map((current) => {
+    return current.price;
+  });
+
+  for (const offerItem of availableOffers) {
+    let offerTitle = offerItem.title;
+    let offerPrice = offerItem.price;
+    let check = ``;
+    if (offer === []) {
+      check = ``;
+    } else if (offersTitle.includes(offerTitle) && offersPrice.includes(offerPrice)) {
+      check = `checked`;
+    }
+
+    result += `<div class="event__offer-selector">
+        <input class="event__offer-checkbox  visually-hidden"
+         id="event-offer-${offerTitle}"
+         type="checkbox"
+         name="event-offer-luggage"
+         ${check}
+         data-offer-title="${offerTitle}"
+         data-offer-price="${offerPrice}"
+         ${isDisable ? `disabled` : ``}>
+          <label class="event__offer-label" for="event-offer-${offerTitle}">
+            <span class="event__offer-title">${offerTitle}</span>
+            &plus;
+            &euro;&nbsp;<span class="event__offer-price">${offerPrice}</span>
+          </label>
+      </div>`;
+
+  }
+  return result;
+};
+
+const renderOffersContainer = (availableOffers, offer, isDisabled) => {
+  if (availableOffers.length === 0) {
+    return ``;
+  }
+
+  return `<section class="event__section  event__section--offers">
+          <h3 class="event__section-title  event__section-title--offers">Offers</h3>
+
+          <div class="event__available-offers">
+            ${renderOffers(offer, isDisabled, availableOffers)}
+          </div>
+        </section>`;
+};
+
+const renderAvailablePoints = (pointsType, identifier, selectedType, isDisable) => {
+  return pointsType.reduce((result, type) => {
+    return (
+      result + `<div class="event__type-item">
+        <input id="event-type-${type}-${identifier}"
+          class="event__type-input  visually-hidden"
+          type="radio" name="event-type"
+          value="${type}"
+          ${(type === selectedType) ? `checked` : ``}
+          ${isDisable ? `disabled` : ``}>
+          <label class="event__type-label  event__type-label--${type.toLowerCase()}" for="event-type-${type}-${identifier}">${type}</label>
+      </div>`
+    );
+  }, ``);
+};
+
+const renderAvailableDestinations = (allDestinations, destination) => {
+  return allDestinations.getAvailableDestinations()
+    .reduce((result, currentDestination) => {
+      const isSelected = currentDestination.name === destination.name ? `selected` : ``;
+      return (result + `<option ${isSelected} value='${currentDestination.name}'>${currentDestination.name}</option>`);
+    }, ``);
+};
+
+const renderDescription = (description) => {
+  const photos = renderPhotos(description.pictures);
+  if (description.description === `` && photos === ``) {
+    return ``;
+  }
+  return `<section class="event__section  event__section--destination">
+    <h3 class="event__section-title  event__section-title--destination">Destination</h3>
+    <p class="event__destination-description">${description.description}</p>
+
+    <div class="event__photos-container">
+      <div class="event__photos-tape">
+        ${photos}
+      </div>
+    </div>
+  </section>`;
+};
 
 
 export default class EventEdit extends SmartView {
-
   constructor(availableOffers, itemEvent, availableDestinations, newEvent = false) {
     super();
 
@@ -44,9 +155,7 @@ export default class EventEdit extends SmartView {
       destination,
       timeStart,
       timeEnd,
-      description,
       offer,
-      photos,
       cost,
       isFavorite,
       isDisabled,
@@ -54,101 +163,9 @@ export default class EventEdit extends SmartView {
       isDeleting
     } = this._data;
 
-    let availableOffers = this._availableOffers.getAvailableOffers(pointType).offers;
+    const availableOffers = this._availableOffers.getAvailableOffers(pointType).offers;
 
     const availableDestinations = this._availableDestinations;
-
-    const formateDate = (date) => {
-      let str = date.toLocaleString(`en-GB`, {day: `2-digit`, month: `2-digit`, year: `numeric`, hour12: false, hour: `2-digit`, minute: `2-digit`});
-      return str.replace(`,`, ``);
-    };
-
-    const renderPhotos = (allPhotos) => {
-      return allPhotos.reduce((result, photo) => {
-        return (result + `<img class="event__photo" src="${photo}" alt="Event photo">`);
-      }, ``);
-    };
-
-    const renderOffersContainer = () => {
-      if (availableOffers.length === 0) {
-        return ``;
-      }
-
-      return `<section class="event__section  event__section--offers">
-          <h3 class="event__section-title  event__section-title--offers">Offers</h3>
-
-          <div class="event__available-offers">
-            ${renderOffers(offer, isDisabled)}
-          </div>
-        </section>`;
-    };
-
-    const renderOffers = (offers, isDisable) => {
-      let result = ``;
-      if (offer === null) {
-        offer = [];
-      }
-
-      const offersTitle = offer.map((current) => {
-        return current.title;
-      });
-      const offersPrice = offer.map((current) => {
-        return current.price;
-      });
-
-      for (const offerItem of availableOffers) {
-        let offerTitle = offerItem.title;
-        let offerPrice = offerItem.price;
-        let check = ``;
-        if (offers === []) {
-          check = ``;
-        } else if (offersTitle.includes(offerTitle) && offersPrice.includes(offerPrice)) {
-          check = `checked`;
-        }
-
-        result += `<div class="event__offer-selector">
-        <input class="event__offer-checkbox  visually-hidden"
-         id="event-offer-${offerTitle}"
-         type="checkbox"
-         name="event-offer-luggage"
-         ${check}
-         data-offer-title="${offerTitle}"
-         data-offer-price="${offerPrice}"
-         ${isDisable ? `disabled` : ``}>
-          <label class="event__offer-label" for="event-offer-${offerTitle}">
-            <span class="event__offer-title">${offerTitle}</span>
-            &plus;
-            &euro;&nbsp;<span class="event__offer-price">${offerPrice}</span>
-          </label>
-      </div>`;
-
-      }
-      return result;
-    };
-
-    const renderAvailablePoints = (pointsType, identifier, selectedType, isDisable) => {
-      return pointsType.reduce((result, type) => {
-        return (
-          result + `<div class="event__type-item">
-        <input id="event-type-${type}-${identifier}"
-          class="event__type-input  visually-hidden"
-          type="radio" name="event-type"
-          value="${type}"
-          ${(type === selectedType) ? `checked` : ``}
-          ${isDisable ? `disabled` : ``}>
-          <label class="event__type-label  event__type-label--${type.toLowerCase()}" for="event-type-${type}-${identifier}">${type}</label>
-      </div>`
-        );
-      }, ``);
-    };
-
-    const renderAvailableDestinations = (allDestinations) => {
-      return allDestinations.getAvailableDestinations()
-        .reduce((result, currentDestination) => {
-          const isSelected = currentDestination.name === destination.name ? `selected` : ``;
-          return (result + `<option ${isSelected} value='${currentDestination.name}'>${currentDestination.name}</option>`);
-        }, ``);
-    };
 
     const bodyTemplate = `<form class="trip-events__item  event  event--edit" action="#" method="post">
       <header class="event__header">
@@ -163,11 +180,11 @@ export default class EventEdit extends SmartView {
             <fieldset class="event__type-group">
               <legend class="visually-hidden">Transfer</legend>
 
-              ${renderAvailablePoints(TRANSFER_POINTS, id, pointType)}
+              ${renderAvailablePoints(TRANSFER_POINTS, id, pointType, isDisabled)}
             </fieldset>
             <fieldset class="event__type-group">
               <legend class="visually-hidden">Activity</legend>
-              ${renderAvailablePoints(ACTIVITY_POINTS, id, pointType)}
+              ${renderAvailablePoints(ACTIVITY_POINTS, id, pointType, isDisabled)}
             </fieldset>
           </div>
         </div>
@@ -178,7 +195,7 @@ export default class EventEdit extends SmartView {
           </label>
 
           <select class="event__input  event__input--destination" name="select" ${isDisabled ? `disabled` : ``}>
-            ${renderAvailableDestinations(availableDestinations)}
+            ${renderAvailableDestinations(availableDestinations, destination)}
           </select>
         </div>
 
@@ -190,7 +207,7 @@ export default class EventEdit extends SmartView {
            id="event-start-time-1"
            type="text"
            name="event-start-time"
-           value="${formateDate(timeStart)}"
+           value="${formatDate(timeStart)}"
            ${isDisabled ? `disabled` : ``}>
           &mdash;
           <label class="visually-hidden" for="event-end-time-1">
@@ -200,7 +217,7 @@ export default class EventEdit extends SmartView {
            id="event-end-time-1"
            type="text"
            name="event-end-time"
-           value="${formateDate(timeEnd)}"
+           value="${formatDate(timeEnd)}"
            ${isDisabled ? `disabled` : ``}>
         </div>
 
@@ -217,7 +234,7 @@ export default class EventEdit extends SmartView {
             required
             ${isDisabled ? `disabled` : ``}>
         </div>
-<!--          заблочить при неполных полях-->
+
         <button class="event__save-btn  btn  btn--blue"
           type="submit"
           ${isDisabled ? `disabled` : ``} >
@@ -250,19 +267,11 @@ export default class EventEdit extends SmartView {
       </header>
 
       <section class="event__details">
-      ${renderOffersContainer()}
+      ${renderOffersContainer(availableOffers, offer, isDisabled)}
 
-        ${this._newEvent ? `<section class="event__section  event__section--destination">
-          <h3 class="event__section-title  event__section-title--destination">Destination</h3>
-          <p class="event__destination-description">${description}</p>
+      ${renderDescription(destination)}
 
-          <div class="event__photos-container">
-            <div class="event__photos-tape">
-              ${renderPhotos(photos)}
-            </div>
-          </div>
-        </section>
-      </section>` : ``}
+      </section>
     </form>`;
 
     if (this._newEvent) {
@@ -331,13 +340,13 @@ export default class EventEdit extends SmartView {
 
       this.updateData({
         timeStart: userDate,
-        dataSort: dayDate(userDate),
+        dataSort: formateDayDate(userDate),
         timeEnd: userDate
       });
     } else {
       this.updateData({
         timeStart: userDate,
-        dataSort: dayDate(userDate)
+        dataSort: formateDayDate(userDate)
       });
     }
   }
@@ -378,14 +387,13 @@ export default class EventEdit extends SmartView {
 
     const evtOffer = {
       title: evt.target.dataset.offerTitle,
-      // преобразование к числу т.к. с дата атрибута возвращает строку
       price: +evt.target.dataset.offerPrice
     };
-    const newOffers = checkForElementArray(this._data[`offer`], evtOffer);
-    // вносим изменения
+
+    const newOffers = checkForElementArray(this._data[`offer`].slice(), evtOffer);
     this.updateData({
       offer: newOffers
-    });
+    }, true);
   }
 
   _formSubmitHandler(evt) {

@@ -1,17 +1,17 @@
-import {render, RenderPosition, replace, remove} from '../utils/render.js';
+import {render, replace, remove} from '../utils/render.js';
 import EventEditView from '../view/event-edit.js';
 import EventItemView from '../view/event-item.js';
-import {UserAction, UpdateType} from '../const.js';
+import {UserAction, UpdateType, RenderPosition} from '../const.js';
 
 const Mode = {
   DEFAULT: `DEFAULT`,
-  EDITING: `EDITING`,
-  ABORTING: `ABORTING`
+  EDITING: `EDITING`
 };
 
 export const State = {
   SAVING: `SAVING`,
-  DELETING: `DELETING`
+  DELETING: `DELETING`,
+  ABORTING: `ABORTING`
 };
 
 export default class EventItem {
