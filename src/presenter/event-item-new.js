@@ -1,15 +1,12 @@
 import EventEditView from '../view/event-edit.js';
-import {generateId} from '../utils/event.js';
-import {remove, render, RenderPosition} from '../utils/render.js';
-import {UserAction, UpdateType} from '../const.js';
-import {newItemEventDefault} from '../const.js';
+import {remove, render} from '../utils/render.js';
+import {UserAction, UpdateType, RenderPosition} from '../const.js';
 
 export default class EventItemNew {
-  constructor(tripContainer, changeData, availableOffers, availableDestinationsModel) {
-    this._itemEvent = newItemEventDefault;
+  constructor(tripContainer, changeData, availableOffersModel, availableDestinationsModel) {
     this._tripContainer = tripContainer;
     this._changeData = changeData;
-    this._availableOffers = availableOffers;
+    this._availableOffers = availableOffersModel;
     this._availableDestinations = availableDestinationsModel;
 
     this._eventEditComponent = null;
@@ -21,12 +18,26 @@ export default class EventItemNew {
   }
 
   init(callback) {
+    const newItemEventDefault = {
+      pointType: `Taxi`,
+      iconPoint: `taxi.png`,
+      destination: this._availableDestinations.getAvailableDestinations()[0],
+      timeStart: new Date(),
+      timeEnd: new Date(),
+      description: ``,
+      availableOffers: [],
+      offer: [],
+      photos: [],
+      cost: ``,
+      isFavorite: false
+    };
+
     if (this._eventEditComponent !== null) {
       return;
     }
     this._destroyCallback = callback;
 
-    this._eventEditComponent = new EventEditView(this._availableOffers, this._itemEvent, this._availableDestinations, true);
+    this._eventEditComponent = new EventEditView(this._availableOffers, newItemEventDefault, this._availableDestinations, true);
     this._eventEditComponent.setFormSubmitHandler(this._handleFormSubmit);
     this._eventEditComponent.setEventDeleteHandler(this._handleDeleteClick);
     render(this._tripContainer, this._eventEditComponent, RenderPosition.AFTERBEGIN);
@@ -47,13 +58,31 @@ export default class EventItemNew {
     document.removeEventListener(`keydown`, this._escKeyDownHandler);
   }
 
+  setSaving() {
+    this._eventEditComponent.updateData({
+      isDisabled: true,
+      isSaving: true
+    });
+  }
+
+  setAborting() {
+    const resetFormState = () => {
+      this._eventEditComponent.updateData({
+        isDisabled: false,
+        isSaving: false,
+        isDeleting: false
+      });
+    };
+
+    this._eventEditComponent.shake(resetFormState);
+  }
+
   _handleFormSubmit(eventItem) {
     this._changeData(
         UserAction.ADD_EVENT_ITEM,
         UpdateType.MAJOR,
-        Object.assign({id: generateId()}, eventItem)
+        eventItem
     );
-    this.destroy();
   }
 
   _handleDeleteClick() {

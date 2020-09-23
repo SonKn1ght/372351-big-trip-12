@@ -3,11 +3,11 @@ import NoEvent from '../view/no-event.js';
 import SortEvent from '../view/sort-event.js';
 import TripDays from '../view/trip-day.js';
 import Loading from '../view/loading.js';
-import EventItemPresenter from './event-item.js';
+import EventItemPresenter, {State as EventItemPresenterViewState} from './event-item.js';
 import EventItemNewPresenter from './event-item-new.js';
-import {remove, render, RenderPosition} from '../utils/render.js';
-import {SortType, UpdateType, UserAction} from '../const.js';
-import {sortEventDuration, sortEventPrice} from '../utils/event.js';
+import {remove, render} from '../utils/render.js';
+import {SortType, UpdateType, UserAction, RenderPosition} from '../const.js';
+import {sortEventDuration, sortEventPrice, sortDefault} from '../utils/event.js';
 import {filter} from '../utils/filter.js';
 
 
@@ -74,56 +74,7 @@ export default class Trip {
       case SortType.PRICE:
         return filteredEventItems.sort(sortEventPrice);
     }
-    return filteredEventItems;
-  }
-
-  _handleModeChange() {
-    this._eventItemNewPresenter.destroy();
-    Object
-      .values(this._eventItemPresenter)
-      .forEach((presenter) => presenter.resetView());
-  }
-
-  _handleViewAction(actionType, updateType, update) {
-    switch (actionType) {
-      case UserAction.UPDATE_EVENT_ITEM:
-        this._api.updateEventItem(update).then((response) => {
-          this._eventItemsModel.updateEventItem(updateType, response);
-        });
-        break;
-      case UserAction.ADD_EVENT_ITEM:
-        this._eventItemsModel.addEventItem(updateType, update);
-        break;
-      case UserAction.DELETE_EVENT_ITEM:
-        this._eventItemsModel.deleteEventItem(updateType, update);
-        break;
-    }
-  }
-
-  _handleModelEvent(updateType, data) {
-    switch (updateType) {
-      case UpdateType.MINOR:
-        this._eventItemPresenter[data.id].init(data, this._availableOffersModel, this._availableDestinationsModel);
-        break;
-      case UpdateType.MAJOR:
-        this._clearEventsElement();
-        this._renderEventsElement();
-        break;
-      case UpdateType.INIT:
-        this._isLoading = false;
-        remove(this._loadingComponent);
-        this._renderEventsElement();
-        break;
-    }
-  }
-
-  _handleSortTypeChange(sortType) {
-    if (this._currentSortType === sortType) {
-      return;
-    }
-    this._currentSortType = sortType;
-    this._clearEventsElement();
-    this._renderEventsElement();
+    return filteredEventItems.sort(sortDefault);
   }
 
   _renderLoading() {
@@ -160,15 +111,14 @@ export default class Trip {
   }
 
   _renderEventList(itemsEvent) {
-    let uniqueTripDays;
+    let uniqueTripDays = [];
     let count;
 
     if (this._currentSortType === SortType.DEFAULT) {
-      let days = [];
       for (const item of itemsEvent) {
-        days.push(item.dataSort);
+        uniqueTripDays.push(item.dataSort);
       }
-      uniqueTripDays = Array.from(new Set(days));
+      uniqueTripDays = Array.from(new Set(uniqueTripDays));
       count = 1;
     } else {
       uniqueTripDays = [``];
@@ -228,5 +178,74 @@ export default class Trip {
     this._renderSortEvent();
     this._renderTripDays();
     this._renderEventList(eventItems);
+  }
+
+  _handleModeChange() {
+    this._eventItemNewPresenter.destroy();
+    Object
+      .values(this._eventItemPresenter)
+      .forEach((presenter) => presenter.resetView());
+  }
+
+  _handleViewAction(actionType, updateType, update) {
+    switch (actionType) {
+      case UserAction.UPDATE_EVENT_ITEM:
+        this._eventItemPresenter[update.id].setViewState(EventItemPresenterViewState.SAVING);
+        this._api.updateEventItem(update)
+          .then((response) => {
+            this._eventItemsModel.updateEventItem(updateType, response);
+          })
+          .catch(() => {
+            this._eventItemPresenter[update.id].setViewState(EventItemPresenterViewState.ABORTING);
+          });
+        break;
+      case UserAction.ADD_EVENT_ITEM:
+        this._eventItemNewPresenter.setSaving();
+        this._api.addEventItem(update)
+          .then((response) => {
+            this._eventItemsModel.addEventItem(updateType, response);
+          })
+          .catch(() => {
+            this._eventItemNewPresenter.setAborting();
+          });
+        break;
+      case UserAction.DELETE_EVENT_ITEM:
+        this._eventItemPresenter[update.id].setViewState(EventItemPresenterViewState.DELETING);
+        this._api.deleteEventItem(update)
+          .then(() => {
+            this._eventItemsModel.deleteEventItem(updateType, update);
+          })
+          .catch(() => {
+            this._eventItemPresenter[update.id].setViewState(EventItemPresenterViewState.ABORTING);
+          });
+        break;
+    }
+  }
+
+  _handleModelEvent(updateType, data) {
+    switch (updateType) {
+      case UpdateType.MINOR:
+        this._eventItemPresenter[data.id].init(data, this._availableOffersModel, this._availableDestinationsModel);
+        this._eventItemPresenter[data.id].replaceEventToEdit();
+        break;
+      case UpdateType.MAJOR:
+        this._clearEventsElement();
+        this._renderEventsElement();
+        break;
+      case UpdateType.INIT:
+        this._isLoading = false;
+        remove(this._loadingComponent);
+        this._renderEventsElement();
+        break;
+    }
+  }
+
+  _handleSortTypeChange(sortType) {
+    if (this._currentSortType === sortType) {
+      return;
+    }
+    this._currentSortType = sortType;
+    this._clearEventsElement();
+    this._renderEventsElement();
   }
 }

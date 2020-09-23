@@ -2,7 +2,9 @@ import EventItemsModel from './model/event-items.js';
 
 const Method = {
   GET: `GET`,
-  PUT: `PUT`
+  PUT: `PUT`,
+  POST: `POST`,
+  DELETE: `DELETE`
 };
 
 const SuccessHTTPStatus = {
@@ -42,6 +44,24 @@ export default class Api {
     })
       .then(Api.toJSON)
       .then(EventItemsModel.adaptToClient);
+  }
+
+  addEventItem(eventItem) {
+    return this._load({
+      url: `points`,
+      method: Method.POST,
+      body: JSON.stringify(EventItemsModel.adaptToServer(eventItem)),
+      headers: new Headers({'Content-Type': `application/json`})
+    })
+      .then(Api.toJSON)
+      .then(EventItemsModel.adaptToClient);
+  }
+
+  deleteEventItem(eventItem) {
+    return this._load({
+      url: `points/${eventItem.id}`,
+      method: Method.DELETE
+    });
   }
 
   _load({

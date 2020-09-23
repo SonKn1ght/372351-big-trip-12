@@ -1,11 +1,17 @@
-import {render, RenderPosition, replace, remove} from '../utils/render.js';
+import {render, replace, remove} from '../utils/render.js';
 import EventEditView from '../view/event-edit.js';
 import EventItemView from '../view/event-item.js';
-import {UserAction, UpdateType} from '../const.js';
+import {UserAction, UpdateType, RenderPosition} from '../const.js';
 
 const Mode = {
   DEFAULT: `DEFAULT`,
   EDITING: `EDITING`
+};
+
+export const State = {
+  SAVING: `SAVING`,
+  DELETING: `DELETING`,
+  ABORTING: `ABORTING`
 };
 
 export default class EventItem {
@@ -23,6 +29,7 @@ export default class EventItem {
     this._handleDeleteClick = this._handleDeleteClick.bind(this);
     this._escKeyDownHandler = this._escKeyDownHandler.bind(this);
     this._handleFavoriteClick = this._handleFavoriteClick.bind(this);
+    this._handleCloseClick = this._handleCloseClick.bind(this);
   }
 
   init(itemEvent, availableOffers, availableDestinations) {
@@ -37,6 +44,7 @@ export default class EventItem {
     this._eventEditComponent.setFormSubmitHandler(this._handleFormSubmit);
     this._eventEditComponent.setEventDeleteHandler(this._handleDeleteClick);
     this._eventEditComponent.setFavoriteClickHandler(this._handleFavoriteClick);
+    this._eventEditComponent.setCloseClickHandler(this._handleCloseClick);
 
     if (prevEventItemComponent === null || prevEventEditComponent === null) {
       render(this._tripEventsList, this._itemEventComponent, RenderPosition.BEFOREEND);
@@ -48,7 +56,8 @@ export default class EventItem {
     }
 
     if (this._mode === Mode.EDITING) {
-      replace(this._eventEditComponent, prevEventEditComponent);
+      replace(this._itemEventComponent, prevEventEditComponent);
+      this._mode = Mode.DEFAULT;
     }
 
     remove(prevEventItemComponent);
@@ -66,7 +75,36 @@ export default class EventItem {
     }
   }
 
-  _replaceEventToEdit() {
+  setViewState(state) {
+    const resetFormState = () => {
+      this._eventEditComponent.updateData({
+        isDisabled: false,
+        isSaving: false,
+        isDeleting: false
+      });
+    };
+
+    switch (state) {
+      case State.SAVING:
+        this._eventEditComponent.updateData({
+          isDisabled: true,
+          isSaving: true
+        });
+        break;
+      case State.DELETING:
+        this._eventEditComponent.updateData({
+          isDisabled: true,
+          isDeleting: true
+        });
+        break;
+      case State.ABORTING:
+        this._itemEventComponent.shake(resetFormState);
+        this._eventEditComponent.shake(resetFormState);
+        break;
+    }
+  }
+
+  replaceEventToEdit() {
     replace(this._eventEditComponent, this._itemEventComponent);
     document.addEventListener(`keydown`, this._escKeyDownHandler);
     this._changeMode();
@@ -88,16 +126,14 @@ export default class EventItem {
   }
 
   _handleEditClick() {
-    this._replaceEventToEdit();
+    this.replaceEventToEdit();
   }
 
   _handleFormSubmit(eventItem) {
-    // не забыть завести проверку на минор-мажор
     this._changeData(
         UserAction.UPDATE_EVENT_ITEM,
         UpdateType.MAJOR,
         eventItem);
-    this._replaceEditToEvent();
   }
 
   _handleDeleteClick(eventItem) {
@@ -120,5 +156,10 @@ export default class EventItem {
             }
         )
     );
+  }
+
+  _handleCloseClick() {
+    this._eventEditComponent.reset(this._itemEvent);
+    this._replaceEditToEvent();
   }
 }

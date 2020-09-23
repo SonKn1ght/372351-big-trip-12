@@ -1,5 +1,5 @@
 import Observer from '../utils/observer.js';
-import {dayDate, doFirstUpperCase} from '../utils/common.js';
+import {formateDayDate, doFirstUpperCase} from '../utils/common.js';
 
 export default class EventItems extends Observer {
   constructor() {
@@ -34,7 +34,6 @@ export default class EventItems extends Observer {
   }
 
   addEventItem(updateType, update) {
-    // пока добавляем в начало списка, не забыть про пункт тз что точка вставки определяется текуще сортировкой и фильтрами
     this._eventItems = [
       update,
       ...this._eventItems
@@ -64,7 +63,7 @@ export default class EventItems extends Observer {
         eventItem,
         {
           cost: eventItem.base_price,
-          dataSort: dayDate(new Date(eventItem.date_from)),
+          dataSort: formateDayDate(new Date(eventItem.date_from)),
           iconPoint: `${eventItem.type}.png`,
           isFavorite: eventItem.is_favorite,
           offer: eventItem.offers,
