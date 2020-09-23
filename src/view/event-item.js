@@ -10,8 +10,8 @@ const createOffersTemplate = (offers) => {
   let result = ``;
   const threeOffers = offers.slice(0, 3);
   for (const offerItem of threeOffers) {
-    let offerName = offerItem.title;
-    let offerPrice = offerItem.price;
+    const offerName = offerItem.title;
+    const offerPrice = offerItem.price;
     result += `<li class="event__offer">
         <span class="event__offer-title">${offerName}</span>
         &plus;
