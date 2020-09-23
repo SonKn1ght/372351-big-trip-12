@@ -138,6 +138,7 @@ export default class EventEdit extends SmartView {
     this._costInputHandler = this._costInputHandler.bind(this);
     this._offerSelectionHandler = this._offerSelectionHandler.bind(this);
     this._favoriteClickHandler = this._favoriteClickHandler.bind(this);
+    this._closeClickHandler = this._closeClickHandler.bind(this);
     this._startTimeHandler = this._startTimeHandler.bind(this);
     this._endTimeHandler = this._endTimeHandler.bind(this);
     this._setInnerHandlers();
@@ -260,10 +261,9 @@ export default class EventEdit extends SmartView {
           </svg>
         </label>`}
 
-
-        <button class="event__rollup-btn" type="button">
+        ${this._newEvent ? `` : `<button class="event__rollup-btn" type="button">
           <span class="visually-hidden">Open event</span>
-        </button>
+        </button>`}
       </header>
 
       <section class="event__details">
@@ -288,6 +288,7 @@ export default class EventEdit extends SmartView {
     this._setDatapickers();
     this.setFormSubmitHandler(this._callback.formSubmit);
     this.setEventDeleteHandler(this._callback.eventDelete);
+    this.setCloseClickHandler(this._callback.closeClick);
     if (!this._newEvent) {
       this.setFavoriteClickHandler(this._callback.favoriteClick);
     }
@@ -411,6 +412,11 @@ export default class EventEdit extends SmartView {
     this._callback.favoriteClick();
   }
 
+  _closeClickHandler(evt) {
+    evt.preventDefault();
+    this._callback.closeClick();
+  }
+
   setFormSubmitHandler(callback) {
     this._callback.formSubmit = callback;
     this.getElement().addEventListener(`submit`, this._formSubmitHandler);
@@ -424,6 +430,11 @@ export default class EventEdit extends SmartView {
   setFavoriteClickHandler(callback) {
     this._callback.favoriteClick = callback;
     this.getElement().querySelector(`.event__favorite-btn`).addEventListener(`click`, this._favoriteClickHandler);
+  }
+
+  setCloseClickHandler(callback) {
+    this._callback.closeClick = callback;
+    this.getElement().querySelector(`.event__rollup-btn`).addEventListener(`click`, this._closeClickHandler);
   }
 
   static parseItemEventToData(itemEvent) {

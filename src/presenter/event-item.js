@@ -29,6 +29,7 @@ export default class EventItem {
     this._handleDeleteClick = this._handleDeleteClick.bind(this);
     this._escKeyDownHandler = this._escKeyDownHandler.bind(this);
     this._handleFavoriteClick = this._handleFavoriteClick.bind(this);
+    this._handleCloseClick = this._handleCloseClick.bind(this);
   }
 
   init(itemEvent, availableOffers, availableDestinations) {
@@ -43,6 +44,7 @@ export default class EventItem {
     this._eventEditComponent.setFormSubmitHandler(this._handleFormSubmit);
     this._eventEditComponent.setEventDeleteHandler(this._handleDeleteClick);
     this._eventEditComponent.setFavoriteClickHandler(this._handleFavoriteClick);
+    this._eventEditComponent.setCloseClickHandler(this._handleCloseClick);
 
     if (prevEventItemComponent === null || prevEventEditComponent === null) {
       render(this._tripEventsList, this._itemEventComponent, RenderPosition.BEFOREEND);
@@ -154,5 +156,10 @@ export default class EventItem {
             }
         )
     );
+  }
+
+  _handleCloseClick() {
+    this._eventEditComponent.reset(this._itemEvent);
+    this._replaceEditToEvent();
   }
 }
