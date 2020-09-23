@@ -100,7 +100,7 @@ const renderAvailableDestinations = (allDestinations, destination) => {
     }, ``);
 };
 
-const renderDescription = (description) => {
+const renderDescription = (description, isNetwork) => {
   const photos = renderPhotos(description.pictures);
   if (description.description === `` && photos === ``) {
     return ``;
@@ -108,22 +108,24 @@ const renderDescription = (description) => {
   return `<section class="event__section  event__section--destination">
     <h3 class="event__section-title  event__section-title--destination">Destination</h3>
     <p class="event__destination-description">${description.description}</p>
-
-    <div class="event__photos-container">
+    ${isNetwork ? `<div class="event__photos-container">
       <div class="event__photos-tape">
         ${photos}
       </div>
-    </div>
+    </div>` : ``}
+
+
   </section>`;
 };
 
 
 export default class EventEdit extends SmartView {
-  constructor(availableOffers, itemEvent, availableDestinations, newEvent = false) {
+  constructor(availableOffers, itemEvent, availableDestinations, isNetwork, newEvent = false) {
     super();
 
     this._data = EventEdit.parseItemEventToData(itemEvent);
     this._newEvent = newEvent;
+    this._isNetwork = isNetwork;
 
     this._availableOffers = availableOffers;
     this._availableDestinations = availableDestinations;
@@ -269,7 +271,7 @@ export default class EventEdit extends SmartView {
       <section class="event__details">
       ${renderOffersContainer(availableOffers, offer, isDisabled)}
 
-      ${renderDescription(destination)}
+      ${renderDescription(destination, this._isNetwork)}
 
       </section>
     </form>`;
@@ -288,8 +290,8 @@ export default class EventEdit extends SmartView {
     this._setDatapickers();
     this.setFormSubmitHandler(this._callback.formSubmit);
     this.setEventDeleteHandler(this._callback.eventDelete);
-    this.setCloseClickHandler(this._callback.closeClick);
     if (!this._newEvent) {
+      this.setCloseClickHandler(this._callback.closeClick);
       this.setFavoriteClickHandler(this._callback.favoriteClick);
     }
   }
@@ -362,7 +364,7 @@ export default class EventEdit extends SmartView {
     evt.preventDefault();
     this.updateData({
       pointType: evt.target.value,
-      offer: null,
+      offer: [],
       iconPoint: `${evt.target.value.toLowerCase()}.png`
     });
   }
