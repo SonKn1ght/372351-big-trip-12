@@ -6,7 +6,7 @@ import '../../node_modules/flatpickr/dist/flatpickr.min.css';
 import {formateDayDate, checkForElementArray} from '../utils/common.js';
 
 const formatDate = (date) => {
-  let str = date.toLocaleString(`en-GB`, {day: `2-digit`, month: `2-digit`, year: `numeric`, hour12: false, hour: `2-digit`, minute: `2-digit`});
+  const str = date.toLocaleString(`en-GB`, {day: `2-digit`, month: `2-digit`, year: `numeric`, hour12: false, hour: `2-digit`, minute: `2-digit`});
   return str.replace(`,`, ``);
 };
 
@@ -33,8 +33,8 @@ const renderOffers = (offer, isDisable, availableOffers) => {
   });
 
   for (const offerItem of availableOffers) {
-    let offerTitle = offerItem.title;
-    let offerPrice = offerItem.price;
+    const offerTitle = offerItem.title;
+    const offerPrice = offerItem.price;
     let check = ``;
     if (offer === []) {
       check = ``;
@@ -150,7 +150,7 @@ export default class EventEdit extends SmartView {
   }
 
   _getTemplate() {
-    let {id,
+    const {id,
       pointType,
       iconPoint,
       destination,
