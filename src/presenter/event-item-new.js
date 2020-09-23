@@ -17,7 +17,7 @@ export default class EventItemNew {
     this._escKeyDownHandler = this._escKeyDownHandler.bind(this);
   }
 
-  init(callback) {
+  init(callback, isNetwork) {
     const newItemEventDefault = {
       pointType: `Taxi`,
       iconPoint: `taxi.png`,
@@ -37,7 +37,7 @@ export default class EventItemNew {
     }
     this._destroyCallback = callback;
 
-    this._eventEditComponent = new EventEditView(this._availableOffers, newItemEventDefault, this._availableDestinations);
+    this._eventEditComponent = new EventEditView(this._availableOffers, newItemEventDefault, this._availableDestinations, isNetwork, true);
     this._eventEditComponent.setFormSubmitHandler(this._handleFormSubmit);
     this._eventEditComponent.setEventDeleteHandler(this._handleDeleteClick);
     render(this._tripContainer, this._eventEditComponent, RenderPosition.AFTERBEGIN);

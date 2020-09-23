@@ -32,13 +32,13 @@ export default class EventItem {
     this._handleCloseClick = this._handleCloseClick.bind(this);
   }
 
-  init(itemEvent, availableOffers, availableDestinations) {
+  init(itemEvent, availableOffers, availableDestinations, isNetwork) {
     this._itemEvent = itemEvent;
     const prevEventItemComponent = this._itemEventComponent;
     const prevEventEditComponent = this._eventEditComponent;
 
     this._itemEventComponent = new EventItemView(itemEvent);
-    this._eventEditComponent = new EventEditView(availableOffers, itemEvent, availableDestinations);
+    this._eventEditComponent = new EventEditView(availableOffers, itemEvent, availableDestinations, isNetwork);
 
     this._itemEventComponent.setEditClickHandler(this._handleEditClick);
     this._eventEditComponent.setFormSubmitHandler(this._handleFormSubmit);

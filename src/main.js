@@ -114,13 +114,18 @@ Promise.all([
 
 window.addEventListener(`load`, () => {
   navigator.serviceWorker.register(`/sw.js`);
+  if (!window.navigator.onLine) {
+    tripPresenter.setIsNetwork(false);
+  }
 });
 
 window.addEventListener(`online`, () => {
   document.title = document.title.replace(` [offline]`, ``);
   apiEventsItemWithProvider.sync();
+  tripPresenter.setIsNetwork(true);
 });
 
 window.addEventListener(`offline`, () => {
   document.title += ` [offline]`;
+  tripPresenter.setIsNetwork(false);
 });

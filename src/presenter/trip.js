@@ -22,6 +22,7 @@ export default class Trip {
 
     this._eventItemPresenter = {};
     this._isLoading = true;
+    this._isNetwork = true;
     this._api = api;
 
     this._sortEventComponent = null;
@@ -45,7 +46,7 @@ export default class Trip {
     this._eventItemsModel.addObserver(this._handleModelEvent);
     this._filterModel.addObserver(this._handleModelEvent);
 
-    this._renderEventsElement();
+    this._renderEventsElement(this._isNetwork);
   }
 
   destroy() {
@@ -60,8 +61,14 @@ export default class Trip {
 
   createEventItems(callback) {
     remove(this._sortEventComponent);
-    this._eventItemNewPresenter.init(callback);
+    this._eventItemNewPresenter.init(callback, this._isNetwork);
     this._renderSortEvent();
+  }
+
+  setIsNetwork(status) {
+    this._isNetwork = status;
+    this._clearEventsElement();
+    this._renderEventsElement(this._isNetwork);
   }
 
   _getEventItems() {
@@ -104,13 +111,13 @@ export default class Trip {
     render(this._tripContainer, this._tripDaysComponent, RenderPosition.BEFOREEND);
   }
 
-  _renderEventItem(eventListElement, itemEvent, availableOffers, availableDestinations) {
+  _renderEventItem(eventListElement, itemEvent, availableOffers, availableDestinations, isNetwork) {
     const eventItemPresenter = new EventItemPresenter(eventListElement, this._handleViewAction, this._handleModeChange);
-    eventItemPresenter.init(itemEvent, availableOffers, availableDestinations);
+    eventItemPresenter.init(itemEvent, availableOffers, availableDestinations, isNetwork);
     this._eventItemPresenter[itemEvent.id] = eventItemPresenter;
   }
 
-  _renderEventList(itemsEvent) {
+  _renderEventList(itemsEvent, isNetwork) {
     let uniqueTripDays = [];
     let count;
 
@@ -139,7 +146,7 @@ export default class Trip {
           });
       }
       currentDayItemsEvent.forEach((point) => {
-        this._renderEventItem(tripEventsList, point, this._availableOffersModel, this._availableDestinationsModel);
+        this._renderEventItem(tripEventsList, point, this._availableOffersModel, this._availableDestinationsModel, isNetwork);
       });
     });
   }
@@ -163,7 +170,7 @@ export default class Trip {
     }
   }
 
-  _renderEventsElement() {
+  _renderEventsElement(isNetwork = true) {
     if (this._isLoading) {
       this._renderLoading();
       return;
@@ -177,7 +184,7 @@ export default class Trip {
 
     this._renderSortEvent();
     this._renderTripDays();
-    this._renderEventList(eventItems);
+    this._renderEventList(eventItems, isNetwork);
   }
 
   _handleModeChange() {
@@ -230,12 +237,12 @@ export default class Trip {
         break;
       case UpdateType.MAJOR:
         this._clearEventsElement();
-        this._renderEventsElement();
+        this._renderEventsElement(this._isNetwork);
         break;
       case UpdateType.INIT:
         this._isLoading = false;
         remove(this._loadingComponent);
-        this._renderEventsElement();
+        this._renderEventsElement(this._isNetwork);
         break;
     }
   }
@@ -246,6 +253,6 @@ export default class Trip {
     }
     this._currentSortType = sortType;
     this._clearEventsElement();
-    this._renderEventsElement();
+    this._renderEventsElement(this._isNetwork);
   }
 }
