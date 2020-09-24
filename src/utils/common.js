@@ -19,19 +19,19 @@ export const doFirstUpperCase = (string) => {
   return string[0].toUpperCase() + string.slice(1).toLowerCase();
 };
 
-export const checkForElementArray = (array, element) => {
-  if (!Array.isArray(array)) {
-    array = [];
+export const checkForElements = (elements, element) => {
+  if (!Array.isArray(elements)) {
+    elements = [];
   }
-  const verifiedArray = array.filter((current) => {
+  const verifiedElements = elements.filter((current) => {
     if (current.title === element.title && current.price === element.price) {
       return false;
     }
     return true;
   });
-  if (verifiedArray.length === array.length) {
-    array.push(element);
-    return array;
+  if (verifiedElements.length === elements.length) {
+    elements.push(element);
+    return elements;
   }
-  return verifiedArray;
+  return verifiedElements;
 };

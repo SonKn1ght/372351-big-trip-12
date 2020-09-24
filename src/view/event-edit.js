@@ -3,7 +3,7 @@ import SmartView from './smart.js';
 import {addPreposition} from '../utils/event.js';
 import flatpickr from 'flatpickr';
 import '../../node_modules/flatpickr/dist/flatpickr.min.css';
-import {formateDayDate, checkForElementArray} from '../utils/common.js';
+import {formateDayDate, checkForElements} from '../utils/common.js';
 
 const formatDate = (date) => {
   const str = date.toLocaleString(`en-GB`, {day: `2-digit`, month: `2-digit`, year: `numeric`, hour12: false, hour: `2-digit`, minute: `2-digit`});
@@ -19,16 +19,16 @@ const renderPhotos = (allPhotos) => {
   }, ``);
 };
 
-const renderOffers = (offer, isDisable, availableOffers) => {
+const renderOffers = (offers, isDisable, availableOffers) => {
   let result = ``;
-  if (offer === null) {
-    offer = [];
+  if (offers === null) {
+    offers = [];
   }
 
-  const offersTitle = offer.map((current) => {
+  const titles = offers.map((current) => {
     return current.title;
   });
-  const offersPrice = offer.map((current) => {
+  const prices = offers.map((current) => {
     return current.price;
   });
 
@@ -36,9 +36,9 @@ const renderOffers = (offer, isDisable, availableOffers) => {
     const offerTitle = offerItem.title;
     const offerPrice = offerItem.price;
     let check = ``;
-    if (offer === []) {
+    if (offers === []) {
       check = ``;
-    } else if (offersTitle.includes(offerTitle) && offersPrice.includes(offerPrice)) {
+    } else if (titles.includes(offerTitle) && prices.includes(offerPrice)) {
       check = `checked`;
     }
 
@@ -393,7 +393,7 @@ export default class EventEdit extends SmartView {
       price: +evt.target.dataset.offerPrice
     };
 
-    const newOffers = checkForElementArray(this._data[`offer`].slice(), evtOffer);
+    const newOffers = checkForElements(this._data[`offer`].slice(), evtOffer);
     this.updateData({
       offer: newOffers
     }, true);

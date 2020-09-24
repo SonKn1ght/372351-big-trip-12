@@ -27,10 +27,10 @@ export default class Tabs extends AbstractView {
   }
 
   switchActive(newEventItem = false) {
-    const tabsElement = this.getElement().querySelectorAll(`.trip-tabs__btn`);
+    const tabs = this.getElement().querySelectorAll(`.trip-tabs__btn`);
 
     if (newEventItem) {
-      if (tabsElement[1].classList.contains(`trip-tabs__btn--active`)) {
+      if (tabs[1].classList.contains(`trip-tabs__btn--active`)) {
         this._currentTypeTab = TabType.TABLE;
         this.switchActive();
         return;
@@ -39,7 +39,7 @@ export default class Tabs extends AbstractView {
       }
     }
 
-    tabsElement.forEach((current) => {
+    tabs.forEach((current) => {
       current.classList.toggle(`trip-tabs__btn--active`);
     });
   }
