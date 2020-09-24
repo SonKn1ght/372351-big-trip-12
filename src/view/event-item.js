@@ -3,13 +3,18 @@ import {addPreposition} from '../utils/event.js';
 import {formatEventDuration} from '../utils/event.js';
 import he from 'he';
 
+const INITIAL_LENGTH_OF_TIME_OUTPUT = 0;
+const FINITE_LENGTH_OF_TIME_OUTPUT = 16;
+const INITIAL_NUMBER_OF_OFFERS = 0;
+const FINITE_NUMBER_OF_OFFERS = 3;
+
 const createOffersTemplate = (offers) => {
   if (!offers) {
     return ``;
   }
   let result = ``;
-  const threeOffers = offers.slice(0, 3);
-  for (const offerItem of threeOffers) {
+  const displayedOffers = offers.slice(INITIAL_NUMBER_OF_OFFERS, FINITE_NUMBER_OF_OFFERS);
+  for (const offerItem of displayedOffers) {
     const offerName = offerItem.title;
     const offerPrice = offerItem.price;
     result += `<li class="event__offer">
@@ -26,7 +31,7 @@ const humanizeDate = (Date) => {
 };
 
 const formattingDateTime = (time) => {
-  return time.toISOString().slice(0, 16);
+  return time.toISOString().slice(INITIAL_LENGTH_OF_TIME_OUTPUT, FINITE_LENGTH_OF_TIME_OUTPUT);
 };
 
 export default class EventItem extends AbstractView {
