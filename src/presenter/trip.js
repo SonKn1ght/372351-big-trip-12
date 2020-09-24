@@ -6,7 +6,7 @@ import Loading from '../view/loading.js';
 import EventItemPresenter, {State as EventItemPresenterViewState} from './event-item.js';
 import EventItemNewPresenter from './event-item-new.js';
 import {remove, render} from '../utils/render.js';
-import {SortType, UpdateType, UserAction, RenderPosition} from '../const.js';
+import {SortType, FilterType, UpdateType, UserAction, RenderPosition} from '../const.js';
 import {sortEventDuration, sortEventPrice, sortDefault} from '../utils/event.js';
 import {filter} from '../utils/filter.js';
 
@@ -19,6 +19,7 @@ export default class Trip {
     this._availableDestinationsModel = availableDestinationsModel;
     this._tripContainer = tripContainer;
     this._currentSortType = SortType.DEFAULT;
+    this._currentFilterType = FilterType.EVERYTHING;
 
     this._eventItemPresenter = {};
     this._isLoading = true;
@@ -73,6 +74,10 @@ export default class Trip {
 
   _getEventItems() {
     const filterType = this._filterModel.getFilter();
+    if (filterType !== this._currentFilterType) {
+      this._currentSortType = SortType.DEFAULT;
+      this._currentFilterType = filterType;
+    }
     const eventItems = this._eventItemsModel.getEventItems();
     const filteredEventItems = filter[filterType](eventItems);
     switch (this._currentSortType) {
