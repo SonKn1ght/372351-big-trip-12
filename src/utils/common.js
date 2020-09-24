@@ -4,8 +4,8 @@ export const formateDayDate = (date) => {
 
 export const addZero = (number) => {
   let numberCurrent = String(number);
-  const twoDigit = 2;
-  if (numberCurrent.length === twoDigit) {
+  const TWO_DIGIT = 2;
+  if (numberCurrent.length === TWO_DIGIT) {
     return number;
   }
   numberCurrent = `0${number}`;
