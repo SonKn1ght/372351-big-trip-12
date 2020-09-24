@@ -141,7 +141,7 @@ export default class Trip {
       const eventListElement = new DayItem(count, currentDay);
       count++;
       render(this._tripDaysComponent, eventListElement, RenderPosition.BEFOREEND);
-      const tripEventsList = eventListElement.getElement().querySelector(`.trip-events__list`);
+      const tripEventsList = eventListElement.getEventsList();
       let currentDayItemsEvent = itemsEvent;
       if (this._currentSortType === SortType.DEFAULT) {
         currentDayItemsEvent = itemsEvent
