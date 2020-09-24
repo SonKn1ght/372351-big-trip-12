@@ -24,10 +24,7 @@ export const checkForElements = (elements, element) => {
     elements = [];
   }
   const verifiedElements = elements.filter((current) => {
-    if (current.title === element.title && current.price === element.price) {
-      return false;
-    }
-    return true;
+    return !(current.title === element.title && current.price === element.price);
   });
   if (verifiedElements.length === elements.length) {
     elements.push(element);
