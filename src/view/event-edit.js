@@ -36,9 +36,7 @@ const renderOffers = (offers, isDisable, availableOffers) => {
     const offerTitle = offerItem.title;
     const offerPrice = offerItem.price;
     let check = ``;
-    if (offers === []) {
-      check = ``;
-    } else if (titles.includes(offerTitle) && prices.includes(offerPrice)) {
+    if (titles.includes(offerTitle) && prices.includes(offerPrice)) {
       check = `checked`;
     }
 
