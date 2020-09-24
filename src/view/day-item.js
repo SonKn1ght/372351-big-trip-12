@@ -22,7 +22,7 @@ export default class DayItem extends AbstractView {
   }
 
   getEventsList() {
-    return this.getElement().querySelector(`.trip-events__list`)
+    return this.getElement().querySelector(`.trip-events__list`);
   }
 
   _getTemplate() {
