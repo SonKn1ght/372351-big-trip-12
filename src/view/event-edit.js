@@ -35,10 +35,7 @@ const renderOffers = (offers, isDisable, availableOffers) => {
   for (const offerItem of availableOffers) {
     const offerTitle = offerItem.title;
     const offerPrice = offerItem.price;
-    let check = ``;
-    if (titles.includes(offerTitle) && prices.includes(offerPrice)) {
-      check = `checked`;
-    }
+    const check = (titles.includes(offerTitle) && prices.includes(offerPrice)) ? `checked` : ``;
 
     result += `<div class="event__offer-selector">
         <input class="event__offer-checkbox  visually-hidden"
