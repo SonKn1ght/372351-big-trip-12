@@ -34,9 +34,8 @@ export default class Tabs extends AbstractView {
         this._currentTypeTab = TabType.TABLE;
         this.switchActive();
         return;
-      } else {
-        return;
       }
+      return;
     }
 
     tabs.forEach((current) => {
