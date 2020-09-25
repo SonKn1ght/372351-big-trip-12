@@ -49,7 +49,7 @@ const availableDestinationsModel = new DestinationsModel();
 const filterModel = new FilterModel();
 
 const tripPresenter = new TripPresenter(eventsElement, mainElement, eventItemsModel, filterModel, availableOffersModel, availableDestinationsModel, apiEventsItemWithProvider);
-const filterPresenter = new FilterPresenter(controlElement, filterModel);
+const filterPresenter = new FilterPresenter(controlElement, filterModel, eventItemsModel);
 
 const tabs = new TabsView();
 const newEventItemButton = new NewEventItemButtonView();
