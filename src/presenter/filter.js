@@ -53,9 +53,9 @@ export default class Filter {
     const eventItems = this._eventItemsModel.getEventItems();
 
     return {
-      [FilterType.EVERYTHING]: filter[FilterType.EVERYTHING](eventItems).length,
-      [FilterType.FUTURE]: filter[FilterType.FUTURE](eventItems).length,
-      [FilterType.PAST]: filter[FilterType.PAST](eventItems).length
+      [FilterType.EVERYTHING]: filter[FilterType.EVERYTHING](eventItems.slice()).length,
+      [FilterType.FUTURE]: filter[FilterType.FUTURE](eventItems.slice()).length,
+      [FilterType.PAST]: filter[FilterType.PAST](eventItems.slice()).length
     };
   }
 

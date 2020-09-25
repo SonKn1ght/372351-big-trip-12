@@ -50,7 +50,6 @@ export default class Trip {
     this._filterModel.addObserver(this._handleModelEvent);
 
     this._renderEventsElement(this._isNetwork);
-    // this.renderTripInfo();
   }
 
   destroy() {
@@ -82,7 +81,7 @@ export default class Trip {
       this._currentFilterType = filterType;
     }
     const eventItems = this._eventItemsModel.getEventItems();
-    const filteredEventItems = filter[filterType](eventItems);
+    const filteredEventItems = filter[filterType](eventItems.slice());
     switch (this._currentSortType) {
       case SortType.DURATION:
         return filteredEventItems.sort(sortEventDuration);
