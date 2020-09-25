@@ -48,12 +48,11 @@ const availableOffersModel = new OffersModel();
 const availableDestinationsModel = new DestinationsModel();
 const filterModel = new FilterModel();
 
-const tripPresenter = new TripPresenter(eventsElement, eventItemsModel, filterModel, availableOffersModel, availableDestinationsModel, apiEventsItemWithProvider);
+const tripPresenter = new TripPresenter(eventsElement, mainElement, eventItemsModel, filterModel, availableOffersModel, availableDestinationsModel, apiEventsItemWithProvider);
 const filterPresenter = new FilterPresenter(controlElement, filterModel);
 
 const tabs = new TabsView();
 const newEventItemButton = new NewEventItemButtonView();
-
 
 render(controlElement, tabs.getElementBeforeTitle(), RenderPosition.BEFOREEND);
 render(controlElement, tabs, RenderPosition.BEFOREEND);

@@ -9,19 +9,21 @@ import {remove, render} from '../utils/render.js';
 import {SortType, FilterType, UpdateType, UserAction, RenderPosition} from '../const.js';
 import {sortEventDuration, sortEventPrice, sortDefault} from '../utils/event.js';
 import {filter} from '../utils/filter.js';
-
+import TripInfoPresenter from './trip-info.js';
 
 export default class Trip {
-  constructor(tripContainer, eventItemsModel, filterModel, availableOffersModel, availableDestinationsModel, api) {
+  constructor(tripContainer, tripInfoContainer, eventItemsModel, filterModel, availableOffersModel, availableDestinationsModel, api) {
     this._eventItemsModel = eventItemsModel;
     this._filterModel = filterModel;
     this._availableOffersModel = availableOffersModel;
     this._availableDestinationsModel = availableDestinationsModel;
     this._tripContainer = tripContainer;
+    this._tripInfoContainer = tripInfoContainer;
     this._currentSortType = SortType.DEFAULT;
     this._currentFilterType = FilterType.EVERYTHING;
 
     this._eventItemPresenter = {};
+    this._tripInfoPresenter = new TripInfoPresenter(this._tripInfoContainer);
     this._isLoading = true;
     this._isNetwork = true;
     this._api = api;
@@ -48,6 +50,7 @@ export default class Trip {
     this._filterModel.addObserver(this._handleModelEvent);
 
     this._renderEventsElement(this._isNetwork);
+    // this.renderTripInfo();
   }
 
   destroy() {
@@ -186,10 +189,17 @@ export default class Trip {
       this._renderNoEvent();
       return;
     }
-
     this._renderSortEvent();
     this._renderTripDays();
     this._renderEventList(eventItems, isNetwork);
+  }
+
+  _renderTripInfo() {
+    this._tripInfoPresenter.init(this._eventItemsModel);
+  }
+
+  _destroyTripInfo() {
+    this._tripInfoPresenter.destroy();
   }
 
   _handleModeChange() {
@@ -243,10 +253,13 @@ export default class Trip {
       case UpdateType.MAJOR:
         this._clearEventsElement();
         this._renderEventsElement(this._isNetwork);
+        this._destroyTripInfo();
+        this._renderTripInfo();
         break;
       case UpdateType.INIT:
         this._isLoading = false;
         remove(this._loadingComponent);
+        this._renderTripInfo();
         this._renderEventsElement(this._isNetwork);
         break;
     }
