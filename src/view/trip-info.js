@@ -7,7 +7,7 @@ const NO_ITEMS = 0;
 
 const renderTravelPoints = (eventItems) => {
   const travelPoints = [];
-  for (let item of eventItems) {
+  for (const item of eventItems) {
     travelPoints.push(item.destination.name);
   }
   if (travelPoints.length <= NUMBER_POINTS) {
