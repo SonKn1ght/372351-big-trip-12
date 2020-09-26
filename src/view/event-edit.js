@@ -3,7 +3,7 @@ import SmartView from './smart.js';
 import {addPreposition} from '../utils/event.js';
 import flatpickr from 'flatpickr';
 import '../../node_modules/flatpickr/dist/flatpickr.min.css';
-import {formateDayDate, checkForElementArray} from '../utils/common.js';
+import {formateDayDate, checkForElements} from '../utils/common.js';
 
 const formatDate = (date) => {
   const str = date.toLocaleString(`en-GB`, {day: `2-digit`, month: `2-digit`, year: `numeric`, hour12: false, hour: `2-digit`, minute: `2-digit`});
@@ -19,28 +19,23 @@ const renderPhotos = (allPhotos) => {
   }, ``);
 };
 
-const renderOffers = (offer, isDisable, availableOffers) => {
+const renderOffers = (offers, isDisable, availableOffers) => {
   let result = ``;
-  if (offer === null) {
-    offer = [];
+  if (offers === null) {
+    offers = [];
   }
 
-  const offersTitle = offer.map((current) => {
+  const titles = offers.map((current) => {
     return current.title;
   });
-  const offersPrice = offer.map((current) => {
+  const prices = offers.map((current) => {
     return current.price;
   });
 
   for (const offerItem of availableOffers) {
     const offerTitle = offerItem.title;
     const offerPrice = offerItem.price;
-    let check = ``;
-    if (offer === []) {
-      check = ``;
-    } else if (offersTitle.includes(offerTitle) && offersPrice.includes(offerPrice)) {
-      check = `checked`;
-    }
+    const check = (titles.includes(offerTitle) && prices.includes(offerPrice)) ? `checked` : ``;
 
     result += `<div class="event__offer-selector">
         <input class="event__offer-checkbox  visually-hidden"
@@ -296,6 +291,26 @@ export default class EventEdit extends SmartView {
     }
   }
 
+  setFormSubmitHandler(callback) {
+    this._callback.formSubmit = callback;
+    this.getElement().addEventListener(`submit`, this._formSubmitHandler);
+  }
+
+  setEventDeleteHandler(callback) {
+    this._callback.eventDelete = callback;
+    this.getElement().querySelector(`.event__reset-btn`).addEventListener(`click`, this._eventDeleteHandler);
+  }
+
+  setFavoriteClickHandler(callback) {
+    this._callback.favoriteClick = callback;
+    this.getElement().querySelector(`.event__favorite-btn`).addEventListener(`click`, this._favoriteClickHandler);
+  }
+
+  setCloseClickHandler(callback) {
+    this._callback.closeClick = callback;
+    this.getElement().querySelector(`.event__rollup-btn`).addEventListener(`click`, this._closeClickHandler);
+  }
+
   _setDatapicker(property, data, selector, callback, minimumDate = false) {
     if (property) {
       property.destroy();
@@ -393,7 +408,7 @@ export default class EventEdit extends SmartView {
       price: +evt.target.dataset.offerPrice
     };
 
-    const newOffers = checkForElementArray(this._data[`offer`].slice(), evtOffer);
+    const newOffers = checkForElements(this._data[`offer`].slice(), evtOffer);
     this.updateData({
       offer: newOffers
     }, true);
@@ -417,26 +432,6 @@ export default class EventEdit extends SmartView {
   _closeClickHandler(evt) {
     evt.preventDefault();
     this._callback.closeClick();
-  }
-
-  setFormSubmitHandler(callback) {
-    this._callback.formSubmit = callback;
-    this.getElement().addEventListener(`submit`, this._formSubmitHandler);
-  }
-
-  setEventDeleteHandler(callback) {
-    this._callback.eventDelete = callback;
-    this.getElement().querySelector(`.event__reset-btn`).addEventListener(`click`, this._eventDeleteHandler);
-  }
-
-  setFavoriteClickHandler(callback) {
-    this._callback.favoriteClick = callback;
-    this.getElement().querySelector(`.event__favorite-btn`).addEventListener(`click`, this._favoriteClickHandler);
-  }
-
-  setCloseClickHandler(callback) {
-    this._callback.closeClick = callback;
-    this.getElement().querySelector(`.event__rollup-btn`).addEventListener(`click`, this._closeClickHandler);
   }
 
   static parseItemEventToData(itemEvent) {

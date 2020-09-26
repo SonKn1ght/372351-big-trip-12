@@ -14,10 +14,10 @@ export const getMoney = (eventItems, typesPoint) => {
 };
 
 export const getTransport = (eventItems, typesPointTransport) => {
-  const result = [];
+  const results = [];
 
   typesPointTransport.forEach((currentType) => {
-    result.push(eventItems.reduce((accumulator, current) => {
+    results.push(eventItems.reduce((accumulator, current) => {
       if (current.pointType === currentType) {
         return accumulator + 1;
       }
@@ -25,7 +25,7 @@ export const getTransport = (eventItems, typesPointTransport) => {
     }, 0)
     );
   });
-  return result;
+  return results;
 };
 
 export const getTimeSpend = (eventItems, typesPoint) => {

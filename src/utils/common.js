@@ -4,8 +4,8 @@ export const formateDayDate = (date) => {
 
 export const addZero = (number) => {
   let numberCurrent = String(number);
-  const twoDigit = 2;
-  if (numberCurrent.length === twoDigit) {
+  const TWO_DIGIT = 2;
+  if (numberCurrent.length === TWO_DIGIT) {
     return number;
   }
   numberCurrent = `0${number}`;
@@ -19,19 +19,16 @@ export const doFirstUpperCase = (string) => {
   return string[0].toUpperCase() + string.slice(1).toLowerCase();
 };
 
-export const checkForElementArray = (array, element) => {
-  if (!Array.isArray(array)) {
-    array = [];
+export const checkForElements = (elements, element) => {
+  if (!Array.isArray(elements)) {
+    elements = [];
   }
-  const verifiedArray = array.filter((current) => {
-    if (current.title === element.title && current.price === element.price) {
-      return false;
-    }
-    return true;
+  const verifiedElements = elements.filter((current) => {
+    return !(current.title === element.title && current.price === element.price);
   });
-  if (verifiedArray.length === array.length) {
-    array.push(element);
-    return array;
+  if (verifiedElements.length === elements.length) {
+    elements.push(element);
+    return elements;
   }
-  return verifiedArray;
+  return verifiedElements;
 };

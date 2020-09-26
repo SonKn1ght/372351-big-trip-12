@@ -21,6 +21,10 @@ export default class DayItem extends AbstractView {
     this._numberDay = numberDay;
   }
 
+  getEventsList() {
+    return this.getElement().querySelector(`.trip-events__list`);
+  }
+
   _getTemplate() {
     return `<li class="trip-days__item  day">
       <div class="day__info">

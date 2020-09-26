@@ -20,6 +20,9 @@ const ACTIVITY_LABELS = [
   `🍴 RESTAURANT`
 ];
 
+const MS_IN_HOURS = 3600000;
+const BAR_HEIGHT = 55;
+
 
 const TRIP_LABELS = TRANSFER_LABELS.concat(ACTIVITY_LABELS);
 
@@ -158,7 +161,6 @@ const renderTransportChart = (transportCtx, dataTransport) => {
 };
 
 const renderTimeSpendChart = (timeSpendCtx, dataTimeSpend) => {
-  const MS_IN_HOURS = 3600000;
 
   return new Chart(timeSpendCtx, {
     plugins: [ChartDataLabels],
@@ -272,7 +274,6 @@ export default class Statistics extends SmartView {
     const transportData = getTransport(this._data, TRANSFER_POINTS);
     const timeSpendData = getTimeSpend(this._data, ALL_POINTS);
 
-    const BAR_HEIGHT = 55;
     moneyCtx.height = BAR_HEIGHT * moneyData.length;
     transportCtx.height = BAR_HEIGHT * transportData.length;
     timeSpendCtx.height = BAR_HEIGHT * timeSpendData.length;

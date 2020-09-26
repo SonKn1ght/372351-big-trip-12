@@ -7,7 +7,7 @@ import TripPresenter from './presenter/trip.js';
 import TabsView from './view/tabs.js';
 import NewEventItemButtonView from './view/new-event-item-button.js';
 import StatisticsView from './view/statistics.js';
-import Api from './api/index.js';
+import Api from './api/api.js';
 import Store from './api/store.js';
 import Provider from './api/provider.js';
 import {render, remove} from './utils/render.js';
@@ -48,12 +48,11 @@ const availableOffersModel = new OffersModel();
 const availableDestinationsModel = new DestinationsModel();
 const filterModel = new FilterModel();
 
-const tripPresenter = new TripPresenter(eventsElement, eventItemsModel, filterModel, availableOffersModel, availableDestinationsModel, apiEventsItemWithProvider);
-const filterPresenter = new FilterPresenter(controlElement, filterModel);
+const tripPresenter = new TripPresenter(eventsElement, mainElement, eventItemsModel, filterModel, availableOffersModel, availableDestinationsModel, apiEventsItemWithProvider);
+const filterPresenter = new FilterPresenter(controlElement, filterModel, eventItemsModel);
 
 const tabs = new TabsView();
 const newEventItemButton = new NewEventItemButtonView();
-
 
 render(controlElement, tabs.getElementBeforeTitle(), RenderPosition.BEFOREEND);
 render(controlElement, tabs, RenderPosition.BEFOREEND);
