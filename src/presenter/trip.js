@@ -246,7 +246,7 @@ export default class Trip {
   _handleModelEvent(updateType, data) {
     switch (updateType) {
       case UpdateType.MINOR:
-        this._eventItemPresenter[data.id].init(data, this._availableOffersModel, this._availableDestinationsModel);
+        this._eventItemPresenter[data.id].init(data, this._availableOffersModel, this._availableDestinationsModel, this._isNetwork);
         this._eventItemPresenter[data.id].replaceEventToEdit();
         break;
       case UpdateType.MAJOR:
