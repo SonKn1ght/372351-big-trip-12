@@ -1,10 +1,11 @@
+const TWO_DIGIT = 2;
+
 export const formateDayDate = (date) => {
   return date.toLocaleString(`en-US`, {year: `numeric`, month: `short`, day: `numeric`});
 };
 
 export const addZero = (number) => {
   let numberCurrent = String(number);
-  const TWO_DIGIT = 2;
   if (numberCurrent.length === TWO_DIGIT) {
     return number;
   }
